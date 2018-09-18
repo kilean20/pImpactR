@@ -1,2 +1,4 @@
 *.so
 *.pyc
+pImpactR.egg-info/
+pImpactR/__pycache__/
