@@ -6,7 +6,10 @@ Created on Thu Jun 23 12:48:25 2016
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except:
+    print 'matplotlib not found. plot module is disabled'
 import os
 #%%############################################################################
 ##            internel class and function to layout lattice plot             ##
@@ -575,7 +578,7 @@ def maxAmplitude(savefileID=0, fileDir='',
 ###                               particle loss                             ###
 ###############################################################################
 ############################################################################### 
-from impact import readIMPACT
+from impactIO import readInputFile
 def powerLoss(savefileID=0, fileDir='', lattice_info=None, plotRange=None):
             
     
@@ -585,7 +588,7 @@ def powerLoss(savefileID=0, fileDir='', lattice_info=None, plotRange=None):
     Particles = np.loadtxt(fileDir+'fort.32')[:,1]
     n_total = Particles[0]
      
-    beam,lattice=readIMPACT('test.in')
+    beam,lattice=readInputFile('test.in')
     PowerLoss = (1.0-Particles/n_total)*Energy*beam['current'] #assume all buckets are filled (Watt)
     
     dP = np.gradient(PowerLoss)
@@ -618,7 +621,7 @@ def powerLoss(savefileID=0, fileDir='', lattice_info=None, plotRange=None):
 ###############################################################################
 ############################################################################### 
 #%% plot poincare of sliced bunch
-from impact import readParticleDataSliced
+from impactIO import readParticleDataSliced
 def phase_space(fileID, ke, mass, freq, zSliced=True, nSlice=1,
                 plotRange = None, fileDir='', saveDir='', showAll=False):
     """
@@ -791,7 +794,7 @@ try:
         plt.show()
         plt.close()
 except:
-    print 'scipy not found. pIMPACT.plot.poincare module is disabled'
+    print 'scipy not found. plot.poincare module is disabled'
 
         
         
