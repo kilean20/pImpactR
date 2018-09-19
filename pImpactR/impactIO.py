@@ -4,6 +4,12 @@ import numpy as np
 import os
 import data
 
+#========= read turn by turn data =======
+from readTBT import *
+def readTBT(fID):
+  nturn,npt = get_tbtsize(fID)
+  return get_tbtdata(fID,nturn,npt)
+#========================================  
 
 def run(nCore=None,execfile='xmain'):
     """

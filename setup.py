@@ -1,5 +1,6 @@
 import os
 from distutils.core import setup
+import sys
 
 # ===== compile naff, readTBT ======
 CC = 'gfortran'
@@ -15,6 +16,7 @@ if err!= 0:
 os.system('mv *.so ./pImpactR/')
 os.system('rm *.o *.mod')
 #====================================
+
 
 setup(
     name = "pImpactR",
