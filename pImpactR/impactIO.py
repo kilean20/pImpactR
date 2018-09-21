@@ -105,19 +105,15 @@ def getElem(type) :
     elem.entrance_curvature = 0.0
     elem.exit_curvature = 0.0
     elem.fringe_field_integration = 0.5
-  elif type=='multipole' :
-    elem.length = 0.1
+  elif type=='multipole_thin' :
     elem.n_sckick = 1
     elem.n_map = 1
-    elem.pole_id = 0
-    elem.strength = 0.0
-    elem.file_id = 0
-    elem.pipe_radius = 1.0
-    elem.misalign_x = 0.0
-    elem.misalign_y = 0.0
-    elem.rotation_x = 0.0
-    elem.rotation_y = 0.0
-    elem.rotation_z = 0.0
+    elem.KL_dipole = 0.0
+    elem.KL_quad   = 0.0
+    elem.KL_sext   = 0.0
+    elem.KL_oct    = 0.0
+    elem.KL_deca   = 0.0
+    elem.KL_dodeca = 0.0
   elif type=='linear_matrix_map' :
     elem.nonlinear_insert_length = 1.0
     elem.nonlinear_insert_tuneAdvance = 0.3
@@ -758,26 +754,17 @@ def _str2elem(elemStr):
     if len(elemStr)>=13:
                  elemDict['fringe_field_integration']=float(elemStr[12])
 
-  elif data.elem_type[elemID] == 'multipole':
-    elemDict = { 'length'     : float(elemStr[0]),
-                 'n_sckick'   : int(elemStr[1]), 
-                 'n_map'      : int(elemStr[2]), 
-                 'pole_id'    : int(float(elemStr[4])), 
-                 'strength'   : float(elemStr[5]), 
-                 'file_id'    : int(float(elemStr[6])),
-                 'pipe_radius': float(elemStr[7])
-                }
+  elif data.elem_type[elemID] == 'multipole_thin':
+    elemDict = {'KL_dipole': float(elemStr[5]),
+                'KL_quad'  : float(elemStr[6]),
+                'KL_sext'  : float(elemStr[7])}
     if len(elemStr)>=9:
-                 elemDict['misalign_x']=float(elemStr[8])
+                 elemDict['KL_oct']=float(elemStr[8])
     if len(elemStr)>=10:
-                 elemDict['misalign_y']=float(elemStr[9])
+                 elemDict['KL_deca']=float(elemStr[9])
     if len(elemStr)>=11:
-                 elemDict['rotation_x']=float(elemStr[10])
-    if len(elemStr)>=12:
-                 elemDict['rotation_y']=float(elemStr[11])
-    if len(elemStr)>=13:
-                 elemDict['rotation_z']=float(elemStr[12])
-
+                 elemDict['KL_dodeca']=float(elemStr[10])
+ 
   elif data.elem_type[elemID] == 'linear_matrix_map':
     elemDict = {
                  'nonlinear_insert_length' : float(elemStr[5]), 
@@ -945,23 +932,19 @@ def _elem2str(elemDict):
             if 'fringe_field_integration' in elemDict:
               elemStr.append(elemDict.fringe_field_integration)
 
-  elif elemDict.type == 'multipole':
-    elemStr[1]=elemDict.n_sckick
-    elemStr[2]=elemDict.n_map
-    elemStr.append(elemDict.pole_id)
-    elemStr.append(elemDict.strength)
-    elemStr.append(elemDict.file_id)
-    elemStr.append(elemDict.pipe_radius)
-    if 'misalign_x' in elemDict:
-      elemStr.append(elemDict.misalign_x)
-      if 'misalign_y' in elemDict:
-        elemStr.append(elemDict.misalign_y)
-        if 'rotation_x' in elemDict:
-          elemStr.append(elemDict.rotation_x)
-          if 'rotation_y' in elemDict:
-            elemStr.append(elemDict.rotation_y)
-            if 'rotation_z' in elemDict:
-              elemStr.append(elemDict.rotation_z)
+  elif elemDict.type == 'multipole_thin':
+    elemStr[0]=0.0
+    elemStr.append(0.0)
+    elemStr.append(elemDict.KL_dipole)
+    elemStr.append(elemDict.KL_quad)
+    elemStr.append(elemDict.KL_sext)
+    if 'KL_oct' in elemDict:
+      elemStr.append(elemDict.KL_oct)
+      if 'KL_deca' in elemDict:
+        elemStr.append(elemDict.KL_deca)
+        if 'KL_dodeca' in elemDict:
+          elemStr.append(elemDict.KL_dodeca)
+
 
   elif elemDict.type == 'linear_matrix_map':
     elemStr.append(0.0)
