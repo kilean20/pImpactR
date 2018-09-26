@@ -54,7 +54,7 @@ def getElem(type) :
   """
   if type not in list(data.elem_type.values()):
     raise AttributeError(type+'is not available type. See data.elem_type')
-  elem = data.dict({'type':type})
+  elem = data.dictClass({'type':type})
   if type=='drift' :
     elem.length = 0.1
     elem.n_sckick = 1
@@ -235,209 +235,6 @@ def _readraw(fname):
       dataList[i][j] = _DtoE(dataList[i][j])
   return dataList
 
-
-def _impactdist2twiss(gamma,freq,mass,param):
-  """
-  get twiss parameters from Impact distparam
-  input :
-    gamma
-    freq  [Hz]
-    param = impact parameters :
-      distribution_type
-      sigmax,lambdax,mux,scalex,scalepx,offsetz,offsetpx
-      sigmay,lambday,muy,scaley,scalepy,offsety,offsetpy
-      sigmaz,lambdaz,muz,scalez,scalepz,offsetz,offsetpz
-  output :
-    twiss :
-      distribution_type
-      betx,y = beta-function in x,y-direction [meter]
-      alfx,y = alpha-function in x,y-direction
-      emitx,y = normalized emittance in x,y-direction [meter]
-      betz = beta-function in z-direction   [degree/MeV]
-      alfz = alpha-function in z-direction
-      emitz = normalized emittance in z-direction  [degree-MeV]
-      scaleX,scalepx,offsetX,offsetpx ...
-  """
-  x_norm = data.clight/(data.twopi*freq)
-  bg = (gamma**2-1.0)**0.5
-  px_norm = 1.0/bg
-  z_norm = 180.0/data.pi
-  pz_norm= mass/1e6
-  
-  twiss = data.dict({'distribution_type':param.distribution_type})
-  # z
-  z00 = param.sigmaz
-  z11 = param.lambdaz
-  z01 = param.muz
-  alf = z01/(1.0-z01**2)**0.5
-  if z00 == 0.0:
-    if z11 != 0.0:
-      z00 = 1.0e-14
-  else:
-    if z11 == 0.0:
-      z11 = 1.0e-14
-  emit= z00*z_norm*z11*pz_norm*(1.0+alf**2)**0.5
-  if z11 == 0.0:
-    beta = 0.0
-  else:
-    beta= emit/(z11*pz_norm)**2
-  twiss.betz = beta # degree/MeV 
-  twiss.alfz = alf
-  twiss.emitz= emit  # degree-MeV 
-  twiss.scalez = param.scalez
-  twiss.scalepz= param.scalepz
-  twiss.offsetz = param.offsetz*z_norm
-  twiss.offsetpz= param.offsetpz*pz_norm 
-    
-  # x,y
-  if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
-    twiss.NL_t  = param.NL_t  
-    twiss.NL_c  = param.NL_c  
-    twiss.betx  = param.betx  
-    twiss.betPx = param.betPx 
-    twiss.emitx = param.emitx
-    if param.distribution_type == 'IOTA_Gauss':
-      twiss.CL  = param.CL
-    return twiss
-    
-  else:
-    x00 = param.sigmax
-    x11 = param.lambdax
-    x01 = param.mux
-    alf = x01/(1.0-x01**2)**0.5
-    if x00 == 0.0:
-      if x11 != 0.0:
-        x00 = 1.0e-15
-    else:
-      if x11 == 0.0:
-        x11 = 1.0e-15  
-    emit= x00*x_norm*x11*(1.0+alf**2)**0.5
-    if x11 == 0.0:
-      beta = 0.0
-    else:
-      beta= emit*bg/x11**2
-    twiss.betx = beta
-    twiss.alfx = alf
-    twiss.emitx= emit
-    twiss.scalex = param.scalex
-    twiss.scalepx= param.scalepx
-    twiss.offsetx = param.offsetx*x_norm
-    twiss.offsetpx= param.offsetpx*px_norm
-    
-    y00 = param.sigmay
-    y11 = param.lambday
-    y01 = param.muy
-    alf = y01/(1.0-y01**2)**0.5
-    if y00 == 0.0:
-      if y11 != 0.0:
-        y00 = 1.0e-15
-    else:
-      if y11 == 0.0:
-        y11 = 1.0e-15  
-    emit= y00*x_norm*y11*(1.0+alf**2)**0.5
-    if y11 == 0.0:
-      beta = 0.0
-    else:
-      beta= emit*bg/y11**2
-    twiss.bety = beta
-    twiss.alfy = alf
-    twiss.emity= emit
-    twiss.scaley = param.scaley
-    twiss.scalepy= param.scalepy
-    twiss.offsety = param.offsety*x_norm
-    twiss.offsetpy= param.offsetpy*px_norm
-
-    return twiss
-
-def _twiss2impactdist(gamma,freq,mass,twiss):
-  """
-  get twiss parameters from Impact distparam
-  input :
-    gamma
-    freq  [Hz]
-    twiss :
-      distribution_type
-      betx,y = beta-function in x,y-direction [meter]
-      alfx,y = alpha-function in x,y-direction
-      emitx,y = normalized emittance in x,y-direction [meter]
-      betz = beta-function in z-direction   [degree/MeV]
-      alfz = alpha-function in z-direction
-      emitz = normalized emittance in z-direction  [degree-MeV]
-      scaleX,scalepx,offsetX,offsetpx ...
-  output :
-    param = impact parameters :
-      distribution_type
-      sigmax,lambdax,mux,scalex,scalepx,offsetz,offsetpx
-      sigmay,lambday,muy,scaley,scalepy,offsety,offsetpy
-      sigmaz,lambdaz,muz,scalez,scalepz,offsetz,offsetpz
-    
-  """
-  x_norm = data.clight/(data.twopi*freq)
-  bg = (gamma**2-1.0)**0.5
-  px_norm = 1.0/bg
-  z_norm = 180.0/data.pi
-  pz_norm= mass/1.0e6
-  
-  param = data.dict({'distribution_type':twiss.distribution_type})
-
-  if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
-    param.NL_t  = twiss.NL_t  
-    param.NL_c  = twiss.NL_c  
-    param.betx  = twiss.betx  
-    param.betPx = twiss.betPx 
-    param.emitx = twiss.emitx
-    if param.distribution_type == 'IOTA_Gauss':
-      param.CL  = twiss.CL
-
-  else:
-    betx  = twiss.betx
-    emitx = twiss.emitx
-    alfx  = twiss.alfx
-    if 0.0 in [betx,emitx]:
-      param.sigmax = 0.0
-      param.lambdax = 0.0
-    else:
-      param.sigmax = (betx*(emitx/bg)/(1.0+alfx*alfx))**0.5/x_norm
-      param.lambdax = ((emitx/bg)/betx)**0.5/px_norm
-    param.mux = alfx / (1.0+alfx*alfx)**0.5 
-    param.scalex  = twiss.scalex  
-    param.scalepx = twiss.scalepx 
-    param.offsetx = twiss.offsetx/x_norm
-    param.offsetpx= twiss.offsetpx/px_norm
-    
-    bety  = twiss.bety
-    emity = twiss.emity
-    alfy  = twiss.alfy
-    if 0.0 in [bety,emity]:
-      param.sigmay = 0.0
-      param.lambday = 0.0
-    else:
-      param.sigmay = (bety*(emity/bg)/(1.0+alfy*alfy))**0.5/x_norm
-      param.lambday = ((emity/bg)/bety)**0.5/px_norm
-    param.muy = alfy / (1.0+alfy*alfy)**0.5 
-    param.scaley  = twiss.scaley  
-    param.scalepy = twiss.scalepy 
-    param.offsety = twiss.offsety/x_norm
-    param.offsetpy= twiss.offsetpy/px_norm
-    
-  betz  = twiss.betz
-  emitz = twiss.emitz 
-  alfz  = twiss.alfz
-  if 0.0 in [betz,emitz]:
-    param.sigmaz = 0.0
-    param.lambdaz = 0.0
-  else:
-    param.sigmaz = ( betz*emitz/(1.0+alfz*alfz) )**0.5/z_norm
-    param.lambdaz = (emitz/betz)**0.5/pz_norm
-  param.muz = alfz / (1.0+alfz*alfz)**0.5 
-  param.scalez  = twiss.scalez  
-  param.scalepz = twiss.scalepz 
-  param.offsetz = twiss.offsetz/z_norm
-  param.offsetpz= twiss.offsetpz/pz_norm
-
-  return param
-
-
 def _DtoE(word):
   if 'D' in word or 'd' in word: 
     try:
@@ -461,9 +258,10 @@ def _str2beam(raw):
   """
   '''cpu cores'''
   i=0
+  beam = data.beam({})
   print('  : mpi task info .......................',end='')
-  beam = data.dict({'nCore_y':int(raw[i][0]),
-                    'nCore_z':int(raw[i][1])})
+  beam.nCore_y = int(raw[i][0])
+  beam.nCore_z = int(raw[i][1])
   '''simulation control parameters'''
   i+=1
   print('......done')
@@ -477,7 +275,7 @@ def _str2beam(raw):
   i+=1
   print('......done')
   print('  : space charge field solver, mesh info ',end='')
-  mesh = data.dict({'mesh_x':int(raw[i][0]),
+  mesh = data.dictClass({'mesh_x':int(raw[i][0]),
                     'mesh_y':int(raw[i][1]),
                     'mesh_z':int(raw[i][2]),
                     'fld_solver':data.fld_solver[int(raw[i][3])],
@@ -489,10 +287,10 @@ def _str2beam(raw):
   i+=1
   print('......done')
   print('  : dist-type,restart,subcycle,#of state ',end='')
-  distribution = data.dict( {'distribution_type':data.distribution_type[int(raw[i][0])]} )
+  distribution = data.dictClass( {'distribution_type':data.distribution_type[int(raw[i][0])]} )
   beam.restart = int(raw[i][1])==1
   beam.subcycle= int(raw[i][2])==1
-  multi_charge = data.dict({'n_states':int(raw[i][3])})
+  multi_charge = data.dictClass({'n_states':int(raw[i][3])})
   '''Multiple Charge State'''
   i+=1
   print('......done')
@@ -546,6 +344,7 @@ def _str2beam(raw):
   distribution.scalepz = float(raw[i][4])
   distribution.offsetz = float(raw[i][5])
   distribution.offsetpz= float(raw[i][6])
+  distribution.mode = 'impactdist'
   """ Reference Orbit """
   print('......done')
   print('  : beam reference orbit info ...........',end='')
@@ -560,7 +359,8 @@ def _str2beam(raw):
   gamma = 1.0 + beam.kinetic_energy/beam.mass
   print('......done')
   print('  : converting impact dist to twiss param',end='')
-  beam.distribution = _impactdist2twiss(gamma,beam.frequency,beam.mass,distribution)
+  beam.distribution = distribution 
+  beam.impactdist2twiss()
   print('......done')
   return beam
 
@@ -603,7 +403,9 @@ def _beam2str(beam):
   
   '''Twiss'''
   gamma = 1.0 + beam.kinetic_energy/beam.mass
-  distribution = _twiss2impactdist(gamma,beam.frequency,beam.mass,beam.distribution)
+  #distribution = _twiss2impactdist(gamma,beam.frequency,beam.mass,beam.distribution)
+  beam.twiss2impactdist()
+  distribution = beam.distribution
   if distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
     temp = [distribution.NL_t,
             distribution.NL_c,
@@ -850,7 +652,7 @@ def _str2elem(elemStr):
   else :
     elemDict= {}
   elemDict['type']   = data.elem_type[elemID]
-  elemDict = data.dict(elemDict)
+  elemDict = data.dictClass(elemDict)
   return elemDict
   
 def _elem2str(elemDict): 
@@ -1021,7 +823,7 @@ def readReferenceOrbit(fileloc=''):
   file = open(fileloc+'fort.18','r')
   lines = file.readlines()
   file.close()
-  f=data.dict({'s':[],'phase':[],'gamma':[],
+  f=data.dictClass({'s':[],'phase':[],'gamma':[],
                'beta':[],'max_radius':[]})
   for j in range(len(lines)) :
     lines[j] = lines[j].split()
@@ -1037,7 +839,7 @@ def readReferenceOrbitAt(sIndex,fileloc=''):
   lines = file.readlines()
   lines = [float(lines[sIndex].split()[i]) for i in range(5)]
   file.close()
-  f=data.dict({'s':lines[0],'phase':lines[1],
+  f=data.dictClass({'s':lines[0],'phase':lines[1],
                'gamma':lines[2],'beta':lines[4],'max_radius':lines[5]})
   return f
 
@@ -1066,7 +868,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     file = open(fileLoc+'fort.24','r')
     lines = file.readlines()
     file.close()
-    f=data.dict({'s':[],'centroid_x':[],'rms_x':[],
+    f=data.dictClass({'s':[],'centroid_x':[],'rms_x':[],
                  'centroid_px':[],'rms_px':[],
                  'alfx':[],'emitx':[]})
     for j in range(0,len(lines),nSkip) :
@@ -1083,7 +885,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     file = open(fileLoc+'fort.25','r')
     lines = file.readlines()
     file.close()
-    f=data.dict({'s':[],'centroid_y':[],'rms_y':[],
+    f=data.dictClass({'s':[],'centroid_y':[],'rms_y':[],
                  'centroid_py':[],'rms_py':[],
                  'alfy':[],'emity':[]})
     for j in range(0,len(lines),nSkip) :
@@ -1100,7 +902,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     file = open(fileLoc+'fort.26','r')
     lines = file.readlines()
     file.close()
-    f=data.dict({'s':[],'centroid_z':[],'rms_z':[],
+    f=data.dictClass({'s':[],'centroid_z':[],'rms_z':[],
                  'centroid_pz':[],'rms_pz':[],
                  'alfz':[],'emitz':[]})
     for j in range(0,len(lines),nSkip) :
@@ -1127,7 +929,7 @@ def readRMS_at(sIndex,direction,fileLoc=''):
     lines = file.readlines()
     lines = lines[sIndex].split()
     file.close()
-    f=data.dict({'s':float(lines[0]),
+    f=data.dictClass({'s':float(lines[0]),
                  'centroid_x':float(lines[1]),
                  'rms_x':float(lines[2]),
                  'centroid_px':float(lines[3]),
@@ -1139,7 +941,7 @@ def readRMS_at(sIndex,direction,fileLoc=''):
     lines = file.readlines()
     lines = lines[sIndex].split()
     file.close()
-    f=data.dict({'s':float(lines[0]),
+    f=data.dictClass({'s':float(lines[0]),
                  'centroid_y':float(lines[1]),
                  'rms_y':float(lines[2]),
                  'centroid_py':float(lines[3]),
@@ -1152,7 +954,7 @@ def readRMS_at(sIndex,direction,fileLoc=''):
     lines = file.readlines()
     lines = lines[sIndex].split()
     file.close()
-    f=data.dict({'s':float(lines[0]),
+    f=data.dictClass({'s':float(lines[0]),
                  'centroid_z':float(lines[1]),
                  'rms_z':float(lines[2]),
                  'centroid_pz':float(lines[3]), 
@@ -1180,13 +982,13 @@ def readOptics(direction,nSkip=1,fileLoc=''):
   """
   if direction == 'x':
     file = open(fileLoc+'fort.24','r')
-    f=data.dict({'s':[],'betx':[],'alfx':[],'emitx':[],'phx':[]})
+    f=data.dictClass({'s':[],'betx':[],'alfx':[],'emitx':[],'phx':[]})
   elif direction == 'y':
     file = open(fileLoc+'fort.25','r')
-    f=data.dict({'s':[],'bety':[],'alfy':[],'emity':[],'phy':[]})
+    f=data.dictClass({'s':[],'bety':[],'alfy':[],'emity':[],'phy':[]})
   elif direction == 'z':
     file = open(fileLoc+'fort.26','r')
-    f=data.dict({'s':[],'betz':[],'alfz':[],'emitz':[],'phz':[]})
+    f=data.dictClass({'s':[],'betz':[],'alfz':[],'emitz':[],'phz':[]})
   lines = file.readlines()
   file.close()
   for i in range(len(lines)):

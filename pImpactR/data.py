@@ -2,7 +2,7 @@ clight = 299792458  # m/s
 pi = 3.141592653589793
 twopi = 2.0*pi
 
-class dict(dict):
+class dictClass(dict):
   """ 
   This class is essentially a subclass of dict
   with attribute accessors, one can see which attributes are available
@@ -16,12 +16,12 @@ class dict(dict):
       return self[name]
     except KeyError:
       raise AttributeError(name)
-          
-  __setattr__ = dict.__setitem__
-  __delattr__ = dict.__delitem__
-  if(dict==None):
+  if dict==None:
     __setattr__ = {}.__setitem__
     __delattr__ = {}.__delitem__
+  else:
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
   def __repr__(self):
     if self.keys():
@@ -48,7 +48,7 @@ class dict(dict):
       if self[k]==val:
         return k
 
-class beam(dict) :
+class beam(dictClass) :
   def __init__(self,dist_type='Waterbag'):
     self.nCore_y=1
     self.nCore_z=1
@@ -65,7 +65,7 @@ class beam(dict) :
     self.charge=1.0
     self.frequency=30.0e6
     self.phase=0.0
-    self.mesh = dict({
+    self.mesh = dictClass({
                 'mesh_x':32,
                 'mesh_y':32,
                 'mesh_z':32,
@@ -75,7 +75,7 @@ class beam(dict) :
                 'boundary_z':0.1
                 })
     if dist_type in ['IOTA_Waterbag','IOTA_Gauss']:
-      self.distribution = dict( {
+      self.distribution = dictClass( {
                 'distribution_type':dist_type,
                 'NL_t' :0.0,
                 'NL_c' :0.0,
@@ -89,7 +89,7 @@ class beam(dict) :
                 'offsetpz':0.0
                 })
     else:
-      self.distribution = dict({
+      self.distribution = dictClass({
                 'distribution_type':dist_type,
                 'betx' :0.0,
                 'alfx' :0.0,
@@ -113,7 +113,8 @@ class beam(dict) :
                 'offsetz' :0.0,
                 'offsetpz':0.0
                 })
-    multi_charge = dict({
+    self.distribution.mode = 'twiss'
+    multi_charge = dictClass({
                 'n_states'   :1,
                 'n_particles':[2048],
                 'current'    :[0.0],
@@ -124,6 +125,8 @@ class beam(dict) :
     """
     convert twiss parameters to Impact distparam
     """
+    if self.distribution.mode == 'impactdist' :
+      return
     gamma = 1.0+self.kinetic_energy/self.mass
     freq  = self.frequency
     mass  = self.mass
@@ -133,17 +136,26 @@ class beam(dict) :
     z_norm = 180.0/pi
     pz_norm= mass/1.0e6
     twiss = self.distribution
-    param = dict({'distribution_type':twiss.distribution_type})
- 
+    param = dictClass({'distribution_type':twiss.distribution_type})
+    param.mode = 'impactdist'
+    
     if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
-      param.NL_t  = twiss.NL_t  
-      param.NL_c  = twiss.NL_c  
+      if all (k in twiss.keys() for k in ('NL_t','NL_c')):
+        param.NL_t = twiss.NL_t
+        param.NL_c = twiss.NL_c
+      else:
+        raise KeyError('NL_t and NL_c must be present in beam.distribution for '+ param.distribution_type +' dist_type')
       param.betx  = twiss.betx  
-      param.betPx = twiss.betPx 
+      if 'betPx' in twiss.keys():
+        param.betPx = twiss.betPx
+      else:
+        param.betPx = -2.0*twiss.alfx
       param.emitx = twiss.emitx
       if param.distribution_type == 'IOTA_Gauss':
-        param.CL  = twiss.CL
-
+        if 'CL' in twiss.keys():
+          param.CL  = twiss.CL
+        else:
+          param.CL = 3.0
     else:
       betx  = twiss.betx
       emitx = twiss.emitx
@@ -196,18 +208,20 @@ class beam(dict) :
     """
     convert Impact distribution parameters to twiss parameters
     """
+    if self.distribution.mode == 'twiss' :
+      return
     gamma = 1.0+self.kinetic_energy/self.mass
     freq  = self.frequency
     mass  = self.mass
-    x_norm = data.clight/(data.twopi*freq)
+    x_norm = clight/(twopi*freq)
     bg = (gamma**2-1.0)**0.5
     px_norm = 1.0/bg
-    z_norm = 180.0/data.pi
+    z_norm = 180.0/pi
     pz_norm= mass/1e6
     
     param = self.distribution
-    twiss = data.dict({'distribution_type':param.distribution_type})
-
+    twiss = dictClass({'distribution_type':param.distribution_type})
+    twiss.mode = 'twiss'
     # z
     z00 = param.sigmaz
     z11 = param.lambdaz
@@ -293,21 +307,22 @@ class beam(dict) :
 
 
       
-mass = dict({'electron'   :510998.9461,
+mass = dictClass({'electron'   :510998.9461,
              'proton'     :938272081.3})
 
-distribution_type = dict({ 1 :'Uniform'   ,
-                           2 :'Gauss'     ,
-                           3 :'Waterbag'  ,
-                           4 :'SemiGauss' ,
-                           5 :'KV'        ,
-                           23:'ReadFile'  ,
-                           81:'IOTA_Waterbag'   ,
-                           82:'IOTA_Gauss',
-                           16:'Multi-charge-state Waterbag',
-                           17:'Multi-charge-state Gaussian'})
+distribution_type = dictClass({
+                    1 :'Uniform'   ,
+                    2 :'Gauss'     ,
+                    3 :'Waterbag'  ,
+                    4 :'SemiGauss' ,
+                    5 :'KV'        ,
+                    23:'ReadFile'  ,
+                    81:'IOTA_Waterbag'   ,
+                    82:'IOTA_Gauss',
+                    16:'Multi-charge-state Waterbag',
+                    17:'Multi-charge-state Gaussian'})
 
-fld_solver = dict( {1:'Trans:open,  Longi:open'  ,
+fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
                     2:'Trans:open,  Longi:period',
                     3:'Trans:Round, Longi:open'  ,
                     4:'Trans:Round, Longi:perod' ,
@@ -316,13 +331,13 @@ fld_solver = dict( {1:'Trans:open,  Longi:open'  ,
                     7:'Symplectic_Spectral_2D'   ,
                     8:'PIC_2D'                   })
 
-standard_output = dict({1:'standard output',
+standard_output = dictClass({1:'standard output',
                         2:'90,95,99 emittance output'})
                     
-integrator = dict({1:'Linear'   ,
+integrator = dictClass({1:'Linear'   ,
                    2:'NonLinear'})
 
-elem_type = dict({0  :'drift'         ,
+elem_type = dictClass({0  :'drift'         ,
                   1  :'quad'          ,
                   2  :'const_focusing',
                   3  :'solenoid'      ,
@@ -347,7 +362,7 @@ elem_type = dict({0  :'drift'         ,
                   -89:'TBToutput_multi_particles',  # turn-by-turn
                   -99:'halt'           })
 
-unit = dict({'length'       :'m',
+unit = dictClass({'length'       :'m',
              'n_sckick'     :'1',
              'field_scaling':'1.0',
              'frequency'    :'Hz',
