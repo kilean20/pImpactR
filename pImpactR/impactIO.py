@@ -20,9 +20,9 @@ def run(nCore=None,execfile='xmain'):
     to change executable path
     """  
     if nCore == None:
-        return os.system(execfile+' > log')
+        return os.system(execfile+' > log.impact_std')
     else:
-        return os.system('mpirun -n '+str(nCore) + ' ' + execfile +' > log')
+        return os.system('mpirun -n '+str(nCore) + ' ' + execfile +' > log.impact_std')
 ###############################################################################
 ###############################################################################
 ###                      IMPACT INPUT GENERATOR                             ###
@@ -1085,26 +1085,28 @@ def normalizeParticleData(data, ke, mass, freq):
   beta = np.sqrt(1.0-1.0/(gamma*gamma))
   x_norm = 2*freq*3.141592653589793/299792458
   px_norm = gamma*beta
-  data[:,0] = data[:,0]*x_norm
-  data[:,1] = data[:,1]*px_norm
-  data[:,2] = data[:,2]*x_norm
-  data[:,3] = data[:,3]*px_norm
-  data[:,4] = np.pi/180*data[:,4]
-  data[:,5] = data[:,5]/mass
-  return data
+  f = copy(data)
+  f[:,0] = data[:,0]*x_norm
+  f[:,1] = data[:,1]*px_norm
+  f[:,2] = data[:,2]*x_norm
+  f[:,3] = data[:,3]*px_norm
+  f[:,4] = np.pi/180*data[:,4]
+  f[:,5] = data[:,5]/mass
+  return f
     
 def unNormalizeParticleData(data, ke, mass, freq):
   gamma = ke/mass+1.0
   beta = np.sqrt(1.0-1.0/(gamma*gamma))
   x_norm = 2*freq*3.141592653589793/299792458
   px_norm = gamma*beta
-  data[:,0] = data[:,0]/x_norm
-  data[:,1] = data[:,1]/px_norm
-  data[:,2] = data[:,2]/x_norm
-  data[:,3] = data[:,3]/px_norm
-  data[:,4] = 180/np.pi*data[:,4]
-  data[:,5] = mass*data[:,5]
-  return data
+  f = copy(data)
+  f[:,0] = data[:,0]/x_norm
+  f[:,1] = data[:,1]/px_norm
+  f[:,2] = data[:,2]/x_norm
+  f[:,3] = data[:,3]/px_norm
+  f[:,4] = 180/np.pi*data[:,4]
+  f[:,5] = mass*data[:,5]
+  return f
 
 def readParticleData(fileID, ke, mass, freq, fileLoc=''):
     data=np.loadtxt(fileLoc+'fort.'+str(fileID))
@@ -1128,29 +1130,29 @@ def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc
         pData : (numpy arr) slized particle data
     """
     data=np.loadtxt(fileLoc+'fort.'+str(fileID))
-    data=unNormalizeParticleData(data, ke, mass, freq)
+    datatmp=unNormalizeParticleData(data, ke, mass, freq)
     
     f=[]    
     if zSliced:
-        z_min = min(data[:,4])
-        z_max = max(data[:,4])
+        z_min = min(datatmp[:,4])
+        z_max = max(datatmp[:,4])
         dz = (z_max-z_min)/float(nSlice)
         for i in range(nSlice):
             temp = []
-            for j in range(len(data[:,4])):
-                if z_min + i*dz < data[j,4] < z_min + (i+1)*dz :
+            for j in range(len(datatmp[:,4])):
+                if z_min + i*dz < datatmp[j,4] < z_min + (i+1)*dz :
                     temp.append(data[j,:])
             f.append(np.array(temp))
         return f
         
     else:
-        ke_min = min(data[:,5])
-        ke_max = max(data[:,5])
+        ke_min = min(datatmp[:,5])
+        ke_max = max(datatmp[:,5])
         dke = (ke_max-ke_min)/float(nSlice)
         for i in range(nSlice):
             temp = []
-            for j in range(len(data[:,5])):
-                if ke_min + i*dke < data[j,5] < ke_min + (i+1)*dke :
+            for j in range(len(datatmp[:,5])):
+                if ke_min + i*dke < datatmp[j,5] < ke_min + (i+1)*dke :
                     temp.append(data[j,:])
             f.append(np.array(temp))  
         return f
@@ -1160,6 +1162,6 @@ def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc
 ###                           Lattice Manipulator                           ###
 ###############################################################################
 ############################################################################### 
-def writeParticleData(data, ke, mass, freq, fileLoc='',filename='partcl.data'):
-    data=normalizeParticleData(data, ke, mass, freq)
-    np.savetxt(filename,data,header=str(len(data))+' 0. 0.',comments='')
+def writeParticleData(data, ke, mass, freq, fileLoc='',fname='partcl.data'):
+    tmpdata=normalizeParticleData(data, ke, mass, freq)
+    np.savetxt(fname,tmpdata,header=str(len(data))+' 0. 0.',comments='')

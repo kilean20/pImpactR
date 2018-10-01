@@ -21,7 +21,6 @@ subroutine get_TBTsize(fID,nturn,npt)
   nturn = 0
   loop1 : DO
     READ(iUnit,iostat=eastat) npt
-    print*, nturn,npt
     IF (eastat < 0) THEN
       EXIT loop1
     ELSE IF (eastat > 0) THEN
@@ -46,8 +45,6 @@ subroutine get_TBTdata(fID,nturn,npt,pData)
   character(len=4) :: num2str
   character(len=6), parameter :: fmt_ = "(I0)"
   
-  
-  print*, nturn,npt
   iUnit = 4692 
   file_open = .true. 
   do while ( file_open ) 
@@ -94,5 +91,7 @@ subroutine get_TBTdata(fID,nturn,npt,pData)
       endif
     enddo
   enddo
-    
+  
+  close(iUnit)
+
 end subroutine get_TBTdata
