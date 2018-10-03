@@ -33,13 +33,13 @@ subroutine get_TBTsize(fID,nturn,npt)
   close(iUnit)
 end subroutine get_TBTsize
 
-
-
-subroutine get_TBTdata(fID,nturn,npt,pData)
+subroutine get_TBTdata(fID,nturn,npt,pData, ke, mass, freq)
   integer, intent(in) :: fID,nturn,npt
+  double precision, intent(in)  :: ke, mass, freq
   double precision, intent(out) :: pData(nturn,6,npt)
   logical :: file_open 
   integer :: iUnit,eastat,mpt,pIndex(npt)
+  double precision :: x_norm, px_norm, gamma, beta
   integer, allocatable :: pIndexTmp(:)
   double precision, allocatable :: pDataTmp(:,:)
   character(len=4) :: num2str
@@ -94,4 +94,16 @@ subroutine get_TBTdata(fID,nturn,npt,pData)
   
   close(iUnit)
 
+  gamma = ke/mass+1.0
+  beta = sqrt(1.0-1.0/(gamma*gamma))
+  x_norm = 2*freq*3.141592653589793/299792458
+  px_norm = gamma*beta
+  
+  pData(:,1,:) = pData(:,1,:)/x_norm
+  pData(:,2,:) = pData(:,2,:)/px_norm
+  pData(:,3,:) = pData(:,3,:)/x_norm
+  pData(:,4,:) = pData(:,4,:)/px_norm
+  pData(:,5,:) = pData(:,5,:)*(180.0/3.14159265359)
+  pData(:,6,:) = pData(:,6,:)*mass
+  
 end subroutine get_TBTdata

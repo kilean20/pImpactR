@@ -3,12 +3,13 @@ from copy import deepcopy as copy
 import numpy as np
 import os
 import data
+import numbers
 
 #========= read turn by turn data =======
 from readTBT import *
-def readTBT(fID):
+def readTBT(fID, ke, mass, freq):
   nturn,npt = get_tbtsize(fID)
-  return get_tbtdata(fID,nturn,npt)
+  return get_tbtdata(fID,nturn,npt, ke, mass, freq)
 #========================================  
 
 def run(nCore=None,execfile='xmain'):
@@ -21,8 +22,10 @@ def run(nCore=None,execfile='xmain'):
     """  
     if nCore == None:
         return os.system(execfile+' > log.impact_std')
-    else:
+    elif isinstance(nCore,numbers.Integral) :
         return os.system('mpirun -n '+str(nCore) + ' ' + execfile +' > log.impact_std')
+    else:
+        return os.system('mpirun -n '+str(nCore.nCore_y*nCore.nCore_z) + ' ' + execfile +' > log.impact_std')
 ###############################################################################
 ###############################################################################
 ###                      IMPACT INPUT GENERATOR                             ###
