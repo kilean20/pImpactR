@@ -114,7 +114,7 @@ class beam(dictClass) :
                 'offsetpz':0.0
                 })
     self.distribution.mode = 'twiss'
-    multi_charge = dictClass({
+    self.multi_charge = dictClass({
                 'n_states'   :1,
                 'n_particles':[2048],
                 'current'    :[0.0],
