@@ -33,12 +33,13 @@ subroutine get_TBTsize(fID,nturn,npt)
   close(iUnit)
 end subroutine get_TBTsize
 
-subroutine get_TBTdata(fID,nturn,npt,pData, ke, mass, freq)
+subroutine get_TBTdata(fID,nturn,npt,pIndex,pData,ke,mass,freq)
   integer, intent(in) :: fID,nturn,npt
+  integer, intent(out) :: pIndex(npt)
   double precision, intent(in)  :: ke, mass, freq
   double precision, intent(out) :: pData(nturn,6,npt)
   logical :: file_open 
-  integer :: iUnit,eastat,mpt,pIndex(npt)
+  integer :: iUnit,eastat,mpt
   double precision :: x_norm, px_norm, gamma, beta
   integer, allocatable :: pIndexTmp(:)
   double precision, allocatable :: pDataTmp(:,:)
@@ -107,3 +108,86 @@ subroutine get_TBTdata(fID,nturn,npt,pData, ke, mass, freq)
   pData(:,6,:) = pData(:,6,:)*mass
   
 end subroutine get_TBTdata
+
+
+subroutine get_rawTBTsize(fID,nturn,npt)
+  integer, intent(in) :: fID
+  integer, intent(out):: nturn,npt
+  
+  logical :: file_open 
+  integer :: iUnit,eastat
+  character(len=4) :: num2str
+  character(len=6), parameter :: fmt_ = "(I0)"
+  
+  
+  iUnit = 4692 
+  file_open = .true. 
+  do while ( file_open ) 
+    iUnit = iUnit + 1 
+    inquire(iUnit, opened = file_open ) 
+  end do 
+  
+  write(num2str,fmt_) fID
+  OPEN(iUnit, file='TBT.'//trim(num2str), status='old', action='read', form='unformatted', position='rewind')
+
+  READ(iUnit,iostat=eastat) npt
+  READ(iUnit,iostat=eastat)
+  READ(iUnit,iostat=eastat)
+  nturn = 1
+  loop1 : DO
+    READ(iUnit,iostat=eastat)
+    IF (eastat < 0) THEN
+      EXIT loop1
+    ELSE IF (eastat > 0) THEN
+      STOP 'IO-error'
+    ENDIF
+    READ(iUnit,iostat=eastat)
+    READ(iUnit,iostat=eastat)
+    nturn = nturn+1
+  END DO loop1
+  close(iUnit)
+end subroutine get_rawTBTsize
+
+
+subroutine get_rawTBTdata(fID,nturn,npt,pIndex,pData,ke,mass,freq)
+  integer, intent(in) :: fID,nturn,npt
+  integer, intent(out) :: pIndex(nturn,npt)
+  double precision, intent(in)  :: ke, mass, freq
+  double precision, intent(out) :: pData(nturn,6,npt)
+  logical :: file_open 
+  integer :: iUnit,eastat,mpt
+  double precision :: x_norm, px_norm, gamma, beta
+  double precision :: pDataTmp(6,npt)
+  character(len=4) :: num2str
+  character(len=6), parameter :: fmt_ = "(I0)"
+  
+  pData = 0d0
+  iUnit = 4692 
+  file_open = .true. 
+  do while ( file_open ) 
+    iUnit = iUnit + 1 
+    inquire(iUnit, opened = file_open ) 
+  end do 
+  write(num2str,fmt_) fID
+  OPEN(iUnit, file='TBT.'//trim(num2str), status='old', action='read', form='unformatted', position='rewind')
+  DO i=1,nturn
+    READ(iUnit,iostat=eastat) mpt
+    READ(iUnit,iostat=eastat) pIndex(i,1:mpt)
+    READ(iUnit,iostat=eastat) pDataTmp(1:6,1:mpt)
+    pData(i,1:6,1:mpt) = pDataTmp(1:6,1:mpt)
+  END DO
+  close(iUnit)
+
+  gamma = ke/mass+1.0
+  beta = sqrt(1.0-1.0/(gamma*gamma))
+  x_norm = 2*freq*3.141592653589793/299792458
+  px_norm = gamma*beta
+  
+  pData(:,1,:) = pData(:,1,:)/x_norm
+  pData(:,2,:) = pData(:,2,:)/px_norm
+  pData(:,3,:) = pData(:,3,:)/x_norm
+  pData(:,4,:) = pData(:,4,:)/px_norm
+  pData(:,5,:) = pData(:,5,:)*(180.0/3.14159265359)
+  pData(:,6,:) = pData(:,6,:)*mass
+  
+end subroutine get_rawTBTdata

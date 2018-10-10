@@ -5,13 +5,21 @@ import os
 import data
 import numbers
 
-#========= read turn by turn data =======
+#=======================================================================
+#========= read turn by turn data ======================================
+#=======================================================================
 from readTBT import *
+
 def readTBT(fID, ke, mass, freq):
   nturn,npt = get_tbtsize(fID)
-  return get_tbtdata(fID,nturn,npt, ke, mass, freq)
-#========================================  
+  return get_tbtdata(fID,nturn,npt,ke,mass,freq)
 
+def readTBTraw(fID, ke, mass, freq):
+  nturn,npt = get_rawtbtsize(fID)
+  return get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
+#=======================================================================
+#=======================================================================
+#=======================================================================
 def run(nCore=None,execfile='xmain'):
     """
     ierr = run(nCore=None)
