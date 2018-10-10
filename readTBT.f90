@@ -33,7 +33,7 @@ subroutine get_TBTsize(fID,nturn,npt)
   close(iUnit)
 end subroutine get_TBTsize
 
-subroutine get_TBTdata(fID,nturn,npt,pIndex,pData,ke,mass,freq)
+subroutine get_TBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   integer, intent(in) :: fID,nturn,npt
   integer, intent(out) :: pIndex(npt)
   double precision, intent(in)  :: ke, mass, freq
@@ -149,7 +149,7 @@ subroutine get_rawTBTsize(fID,nturn,npt)
 end subroutine get_rawTBTsize
 
 
-subroutine get_rawTBTdata(fID,nturn,npt,pIndex,pData,ke,mass,freq)
+subroutine get_rawTBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   integer, intent(in) :: fID,nturn,npt
   integer, intent(out) :: pIndex(nturn,npt)
   double precision, intent(in)  :: ke, mass, freq
