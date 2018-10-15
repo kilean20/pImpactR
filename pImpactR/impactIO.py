@@ -8,15 +8,15 @@ import numbers
 #=======================================================================
 #========= read turn by turn data ======================================
 #=======================================================================
-from readTBT import *
+import readTBT import _readTBT
 
 def readTBT(fID, ke, mass, freq):
-  nturn,npt = get_tbtsize(fID)
-  return get_tbtdata(fID,nturn,npt,ke,mass,freq)
+  nturn,npt = _readTBT.get_tbtsize(fID)
+  return _readTBT.get_tbtdata(fID,nturn,npt,ke,mass,freq)
 
 def readTBTraw(fID, ke, mass, freq):
-  nturn,npt = get_rawtbtsize(fID)
-  return get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
+  nturn,npt = _readTBT.get_rawtbtsize(fID)
+  return _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
 #=======================================================================
 #=======================================================================
 #=======================================================================
@@ -1120,7 +1120,15 @@ def unNormalizeParticleData(data, ke, mass, freq):
   return f
 
 def readParticleData(fileID, ke, mass, freq, fileLoc=''):
-    data=np.loadtxt(fileLoc+'fort.'+str(fileID))
+    if fileID>0:
+      data=np.loadtxt(fileLoc+'fort.'+str(fileID))
+    else:
+      import read_phasespace import as _read_pdata
+      cPath = os.getcwd()
+      os.chdir(fileLoc)
+      npt = _read_pdata.read_phasespace_size(fileID)
+      data= _read_pdata.read_phasespace(fileID,npt)
+      os.chdir(cPath)
     return unNormalizeParticleData(data, ke, mass, freq)
     
 def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc=''):
@@ -1140,7 +1148,16 @@ def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc
     output
         pData : (numpy arr) slized particle data
     """
-    data=np.loadtxt(fileLoc+'fort.'+str(fileID))
+    if fileID>0:
+      data=np.loadtxt(fileLoc+'fort.'+str(fileID))
+    else:
+      import read_phasespace import as _read_pdata
+      cPath = os.getcwd()
+      os.chdir(fileLoc)
+      npt = _read_pdata.read_phasespace_size(fileID)
+      data= _read_pdata.read_phasespace(fileID,npt)
+      os.chdir(cPath)
+      
     datatmp=unNormalizeParticleData(data, ke, mass, freq)
     
     f=[]    

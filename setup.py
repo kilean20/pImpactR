@@ -7,6 +7,9 @@ CC = 'gfortran'
 err = os.system('f2py -c readTBT.f90 -m readTBT')
 if err!= 0:
     print('f2py readTBT.f90 failed')
+err = os.system('f2py -c read_phasespace.f90 -m read_phasespace')
+if err!= 0:
+    print('f2py read_phasespace.f90 failed')
 err = os.system(CC+' -c -fPIC -O3 naff.f90')
 if err!= 0:
     print(CC+' naff.f90 failed')
