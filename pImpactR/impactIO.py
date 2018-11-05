@@ -19,6 +19,11 @@ def readTBT(fID, ke, mass, freq):
 def readTBTraw(fID, ke, mass, freq):
   nturn,npt = _readTBT.get_rawtbtsize(fID)
   return _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
+  
+def readTBT_integral(fID, ke, mass, freq):
+  nturn,npt = _readTBT.get_tbtsize_integral(fID)
+  return _readTBT.get_tbtdata_integral(fID,nturn,npt)
+
 #=======================================================================
 #=======================================================================
 #=======================================================================
@@ -139,9 +144,14 @@ def getElem(type) :
     elem.transverse_scale_c = 0.003
     elem.tune_advance = 0.3
     elem.pipe_radius = 1.0
-  elif type in ['TBToutput_single_particle','TBToutput_multi_particles',
-                'write_raw_ptcl']:
-    elem.file_id = 1001
+  elif type=='TBT_integral' :
+    elem.strength_t = 0.0
+    elem.transverse_scale_c = 0.003
+    elem.beta = 1.0
+    elem.alpha = 0.0
+    elem.file_id = 1000
+  elif type in ['TBT','write_raw_ptcl']:
+    elem.file_id = 1000
   elif type=='loop_through_lattice':
     elem.turns = 1
   return elem
@@ -642,9 +652,6 @@ def _str2elem(elemStr):
     if data.elem_type[elemID] == 'solenoidRF':
                  elemDict['Bz']=float(elemStr[14])
 
-  elif data.elem_type[elemID] == 'write_raw_ptcl':
-    elemDict= {'file_id': int(elemStr[2])}
-
   elif data.elem_type[elemID] == 'centroid_shift':
     elemDict= {'x' : float(elemStr[5]),
                'px': float(elemStr[6]),
@@ -658,10 +665,17 @@ def _str2elem(elemStr):
     elemDict= {'file_id': int(elemStr[2]),
                'value'  : int(elemStr[4])}
 
-  elif data.elem_type[elemID] in ['TBToutput_single_particle',
-                                  'TBToutput_multi_particles']:
+  elif data.elem_type[elemID] in ['TBT',
+                                  'write_raw_ptcl']:
     elemDict= {'file_id': int(elemStr[2])}
     
+  elif data.elem_type[elemID] == 'TBT_integral':
+    elemDict= {'file_id'           : int(elemStr[2]),
+               'beta'              : float(elemStr[4]),
+               'alpha'             : float(elemStr[5]),
+               'strength_t'        : float(elemStr[6]), 
+               'transverse_scale_c': float(elemStr[7])}
+               
   else :
     elemDict= {}
   elemDict['type']   = data.elem_type[elemID]
@@ -816,16 +830,21 @@ def _elem2str(elemDict):
               elemStr.append(elemDict.rotation_z)
               if elemDict.type == 'solenoidRF':
                 elemStr.append(elemDict.Bz)
-
-  elif elemDict.type in ['write_raw_ptcl',
-                         'TBToutput_single_particle',
-                         'TBToutput_multi_particles']:
+               
+  elif elemDict.type in ['write_raw_ptcl','TBT']:
     elemStr[2]=elemDict.file_id
   
   elif elemDict.type == '-8':
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.value)
 
+  elif elemDict.type == 'TBT_integral':
+    elemStr[2]=elemDict.file_id
+    elemStr.append(elemDict.beta)
+    elemStr.append(elemDict.alpha)
+    elemStr.append(elemDict.strength_t)
+    elemStr.append(elemDict.transverse_scale_c)
+                
   for i in range(len(elemStr)):
     elemStr[i] = str(elemStr[i])
 
