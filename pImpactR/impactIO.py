@@ -4,12 +4,14 @@ import numpy as np
 import os
 import data
 import numbers
+#====f2py routines=====
+import read_phasespace as _read_pdata
+import readTBT as _readTBT
+#======================
 
 #=======================================================================
 #========= read turn by turn data ======================================
 #=======================================================================
-import readTBT import _readTBT
-
 def readTBT(fID, ke, mass, freq):
   nturn,npt = _readTBT.get_tbtsize(fID)
   return _readTBT.get_tbtdata(fID,nturn,npt,ke,mass,freq)
@@ -1123,11 +1125,10 @@ def readParticleData(fileID, ke, mass, freq, fileLoc=''):
     if fileID>0:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
     else:
-      import read_phasespace import as _read_pdata
       cPath = os.getcwd()
-      os.chdir(fileLoc)
+      os.chdir(cPath+fileLoc)
       npt = _read_pdata.read_phasespace_size(fileID)
-      data= _read_pdata.read_phasespace(fileID,npt)
+      data= np.transpose(_read_pdata.read_phasespace(fileID,npt))
       os.chdir(cPath)
     return unNormalizeParticleData(data, ke, mass, freq)
     
@@ -1151,11 +1152,10 @@ def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc
     if fileID>0:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
     else:
-      import read_phasespace import as _read_pdata
       cPath = os.getcwd()
-      os.chdir(fileLoc)
+      os.chdir(cPath+fileLoc)
       npt = _read_pdata.read_phasespace_size(fileID)
-      data= _read_pdata.read_phasespace(fileID,npt)
+      data= np.transpose(_read_pdata.read_phasespace(fileID,npt))
       os.chdir(cPath)
       
     datatmp=unNormalizeParticleData(data, ke, mass, freq)
