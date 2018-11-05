@@ -358,8 +358,8 @@ elem_type = dictClass({0  :'drift'         ,
                   -16:'loop_through_lattice',
                   -21:'centroid_shift',
                   -46:'linear_matrix_map',
-                  -88:'TBToutput_single_particle',  # turn-by-turn
-                  -89:'TBToutput_multi_particles',  # turn-by-turn
+                  -88:'TBT_integral',    # turn-by-turn
+                  -89:'TBT',  # turn-by-turn
                   -99:'halt'           })
 
 unit = dictClass({'length'       :'m',
