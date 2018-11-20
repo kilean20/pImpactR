@@ -2,6 +2,13 @@ clight = 299792458  # m/s
 pi = 3.141592653589793
 twopi = 2.0*pi
 
+def defaultKeyVal(d,k,v):
+  if k not in d.keys():
+    return d[k]
+  else:
+    return v
+    
+
 class dictClass(dict):
   """ 
   This class is essentially a subclass of dict
@@ -126,7 +133,7 @@ class beam(dictClass) :
     convert twiss parameters to Impact distparam
     """
     if self.distribution.mode == 'impactdist' :
-      return
+      self.impactdist2twiss()
     gamma = 1.0+self.kinetic_energy/self.mass
     freq  = self.frequency
     mass  = self.mass
@@ -146,10 +153,7 @@ class beam(dictClass) :
       else:
         raise KeyError('NL_t and NL_c must be present in beam.distribution for '+ param.distribution_type +' dist_type')
       param.betx  = twiss.betx  
-      if 'betPx' in twiss.keys():
-        param.betPx = twiss.betPx
-      else:
-        param.betPx = -2.0*twiss.alfx
+      param.alfx = twiss.alfx
       param.emitx = twiss.emitx
       if param.distribution_type == 'IOTA_Gauss':
         if 'CL' in twiss.keys():
@@ -167,10 +171,10 @@ class beam(dictClass) :
         param.sigmax = (betx*(emitx/bg)/(1.0+alfx*alfx))**0.5/x_norm
         param.lambdax = ((emitx/bg)/betx)**0.5/px_norm
       param.mux = alfx / (1.0+alfx*alfx)**0.5 
-      param.scalex  = twiss.scalex  
-      param.scalepx = twiss.scalepx 
-      param.offsetx = twiss.offsetx/x_norm
-      param.offsetpx= twiss.offsetpx/px_norm
+      param.scalex  = defaultKeyVal(twiss,'scalex',1.0) #twiss.scalex  
+      param.scalepx = defaultKeyVal(twiss,'scalepx',1.0) #twiss.scalepx 
+      param.offsetx = defaultKeyVal(twiss,'offsetx',0.0)/x_norm #twiss.offsetx/x_norm
+      param.offsetpx= defaultKeyVal(twiss,'offsetpx',0.0)/px_norm #twiss.offsetpx/px_norm
       
       bety  = twiss.bety
       emity = twiss.emity
@@ -182,10 +186,10 @@ class beam(dictClass) :
         param.sigmay = (bety*(emity/bg)/(1.0+alfy*alfy))**0.5/x_norm
         param.lambday = ((emity/bg)/bety)**0.5/px_norm
       param.muy = alfy / (1.0+alfy*alfy)**0.5 
-      param.scaley  = twiss.scaley  
-      param.scalepy = twiss.scalepy 
-      param.offsety = twiss.offsety/x_norm
-      param.offsetpy= twiss.offsetpy/px_norm
+      param.scaley  = defaultKeyVal(twiss,'scaley',1.0) #twiss.scalex  
+      param.scalepy = defaultKeyVal(twiss,'scalepy',1.0) #twiss.scalepx 
+      param.offsety = defaultKeyVal(twiss,'offsety',0.0)/x_norm #twiss.offsetx/x_norm
+      param.offsetpy= defaultKeyVal(twiss,'offsetpy',0.0)/px_norm #twiss.offsetpx/px_norm
       
     betz  = twiss.betz
     emitz = twiss.emitz 
@@ -209,7 +213,7 @@ class beam(dictClass) :
     convert Impact distribution parameters to twiss parameters
     """
     if self.distribution.mode == 'twiss' :
-      return
+      self.twiss2impactdist()
     gamma = 1.0+self.kinetic_energy/self.mass
     freq  = self.frequency
     mass  = self.mass
@@ -275,10 +279,14 @@ class beam(dictClass) :
       twiss.betx = beta
       twiss.alfx = alf
       twiss.emitx= emit
-      twiss.scalex = param.scalex
-      twiss.scalepx= param.scalepx
-      twiss.offsetx = param.offsetx*x_norm
-      twiss.offsetpx= param.offsetpx*px_norm
+      twiss.scalex  = defaultKeyVal(param,'scalex',1.0) 
+      twiss.scalepx = defaultKeyVal(param,'scalepx',1.0) 
+      twiss.offsetx = defaultKeyVal(param,'offsetx',0.0)*x_norm
+      twiss.offsetpx= defaultKeyVal(param,'offsetpx',0.0)*px_norm
+#       twiss.scalex = param.scalex
+#       twiss.scalepx= param.scalepx
+#       twiss.offsetx = param.offsetx*x_norm
+#       twiss.offsetpx= param.offsetpx*px_norm
       
       y00 = param.sigmay
       y11 = param.lambday
@@ -298,10 +306,14 @@ class beam(dictClass) :
       twiss.bety = beta
       twiss.alfy = alf
       twiss.emity= emit
-      twiss.scaley = param.scaley
-      twiss.scalepy= param.scalepy
-      twiss.offsety = param.offsety*x_norm
-      twiss.offsetpy= param.offsetpy*px_norm
+      twiss.scaley  = defaultKeyVal(param,'scaley',1.0) 
+      twiss.scalepy = defaultKeyVal(param,'scalepy',1.0) 
+      twiss.offsety = defaultKeyVal(param,'offsety',0.0)*x_norm
+      twiss.offsetpy= defaultKeyVal(param,'offsetpy',0.0)*px_norm
+#       twiss.scaley = param.scaley
+#       twiss.scalepy= param.scalepy
+#       twiss.offsety = param.offsety*x_norm
+#       twiss.offsetpy= param.offsetpy*px_norm
     
     self.distribution = twiss
 

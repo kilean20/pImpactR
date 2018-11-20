@@ -20,7 +20,7 @@ def readTBTraw(fID, ke, mass, freq):
   nturn,npt = _readTBT.get_rawtbtsize(fID)
   return _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
   
-def readTBT_integral(fID, ke, mass, freq):
+def readTBT_integral(fID):
   nturn,npt = _readTBT.get_tbtsize_integral(fID)
   return _readTBT.get_tbtdata_integral(fID,nturn,npt)
 
@@ -147,8 +147,8 @@ def getElem(type) :
   elif type=='TBT_integral' :
     elem.strength_t = 0.0
     elem.transverse_scale_c = 0.003
-    elem.beta = 1.0
-    elem.alpha = 0.0
+    elem.betx = 1.0
+    elem.alfx = 0.0
     elem.file_id = 1000
   elif type in ['TBT','write_raw_ptcl']:
     elem.file_id = 1000
@@ -338,7 +338,7 @@ def _str2beam(raw):
     distribution.NL_t  = float(raw[i][0])
     distribution.NL_c  = float(raw[i][1])
     distribution.betx  = float(raw[i][2])
-    distribution.betPx = float(raw[i][3])
+    distribution.alfx  = -float(raw[i][3])/2.0
     distribution.emitx = float(raw[i][4])
     if distribution.distribution_type == 'IOTA_Gauss':
       distribution.CL    = float(raw[i][5])
@@ -433,7 +433,7 @@ def _beam2str(beam):
     temp = [distribution.NL_t,
             distribution.NL_c,
             distribution.betx,
-            distribution.betPx,
+            -2.0*distribution.alfx,
             distribution.emitx]
     if distribution.distribution_type == 'IOTA_Gauss':
       temp.append(distribution.CL)
@@ -671,8 +671,8 @@ def _str2elem(elemStr):
     
   elif data.elem_type[elemID] == 'TBT_integral':
     elemDict= {'file_id'           : int(elemStr[2]),
-               'beta'              : float(elemStr[4]),
-               'alpha'             : float(elemStr[5]),
+               'betx'              : float(elemStr[4]),
+               'alfx'              : float(elemStr[5]),
                'strength_t'        : float(elemStr[6]), 
                'transverse_scale_c': float(elemStr[7])}
                
@@ -833,15 +833,24 @@ def _elem2str(elemDict):
                
   elif elemDict.type in ['write_raw_ptcl','TBT']:
     elemStr[2]=elemDict.file_id
-  
+
+  elif elemDict.type == 'centroid_shift':
+    elemStr.append(1.0)
+    elemStr.append(elemDict.x)
+    elemStr.append(elemDict.px)
+    elemStr.append(elemDict.y)
+    elemStr.append(elemDict.py)
+    elemStr.append(elemDict.z)
+    elemStr.append(elemDict.pz)
+    
   elif elemDict.type == '-8':
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.value)
 
   elif elemDict.type == 'TBT_integral':
     elemStr[2]=elemDict.file_id
-    elemStr.append(elemDict.beta)
-    elemStr.append(elemDict.alpha)
+    elemStr.append(elemDict.betx)
+    elemStr.append(elemDict.alfx)
     elemStr.append(elemDict.strength_t)
     elemStr.append(elemDict.transverse_scale_c)
                 
@@ -946,6 +955,8 @@ def readRMS(direction, nSkip=1,fileLoc=''):
       f.rms_pz.append(float(lines[j][4]))
       f.alfz.append(float(lines[j][5]))
       f.emitz.append(float(lines[j][6])*1.0e6) # degree-MeV
+  for k in f.keys():
+      f[k] = np.array(f[k])
   return f
   
 def readRMS_at(sIndex,direction,fileLoc=''):
@@ -1037,10 +1048,10 @@ def readOptics(direction,nSkip=1,fileLoc=''):
       j+=1
       if j==nSkip:
         j=0
-        f.z.append(z)
+        f.s.append(s)
         f.betx.append(beta)
         f.alfx.append(alpha)
-        f.emitx.append(emiitance_norm)
+        f.emitx.append(emittance_norm)
         f.phx.append(ph)
   elif direction == 'y':
     j=nSkip-1
@@ -1052,10 +1063,10 @@ def readOptics(direction,nSkip=1,fileLoc=''):
       j+=1
       if j==nSkip:
         j=0
-        f.z.append(z)
+        f.s.append(s)
         f.bety.append(beta)
         f.alfy.append(alpha)
-        f.emity.append(emiitance_norm)
+        f.emity.append(emittance_norm)
         f.phy.append(ph)
   elif direction == 'z':
     j=nSkip-1
@@ -1067,10 +1078,10 @@ def readOptics(direction,nSkip=1,fileLoc=''):
       j+=1
       if j==nSkip:
         j=0
-        f.z.append(z)
+        f.s.append(s)
         f.betz.append(beta)
         f.alfz.append(alpha)
-        f.emitz.append(emiitance_norm*1.0e6)
+        f.emitz.append(emittance_norm*1.0e6)
         f.phz.append(ph)
   return f
   

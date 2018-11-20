@@ -148,7 +148,6 @@ end subroutine get_TBTsize_integral
 subroutine get_TBTdata_integral(fID,nturn,npt,pIndex,Integral)
   integer, intent(in) :: fID,nturn,npt
   integer, intent(out) :: pIndex(npt)
-  double precision, intent(in)  :: ke, mass, freq
   double precision, intent(out) :: Integral(nturn,2,npt)
   logical :: file_open 
   integer :: iUnit,eastat,mpt
