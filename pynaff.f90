@@ -1,9 +1,10 @@
-subroutine pynaff(tune,amplitude,n_mode,x,n,window_id,tol)
+subroutine pynaff(tune,amplitude,y,n_mode,x,n,window_id,tol)
   use naffmodule
   implicit none
   integer,   intent(in) :: n_mode, n
   real(8),   intent(out):: tune(n_mode)
   complex(8),intent(out):: amplitude(n_mode)
+  complex(8),intent(out):: y(n)
   complex(8),intent(in) :: x(n)
   integer,optional,intent(in) :: window_id
   real(8),optional,intent(in) :: tol
@@ -21,14 +22,14 @@ subroutine pynaff(tune,amplitude,n_mode,x,n,window_id,tol)
 
   if(p1==-10) then
     if (tol1==-10.0) then
-      call naff(tune,amplitude,n_mode,x)
+      call naff(tune,amplitude,y,n_mode,x,n)
     else
-      call naff(tune,amplitude,n_mode,x,tol=tol1)
+      call naff(tune,amplitude,y,n_mode,x,n,tol=tol1)
     endif
   elseif(tol1==-10.0) then
-    call naff(tune,amplitude,n_mode,x,winID=p1)
+    call naff(tune,amplitude,y,n_mode,x,n,winID=p1)
   else
-    call naff(tune,amplitude,n_mode,x,winID=p1,tol=tol1)
+    call naff(tune,amplitude,y,n_mode,x,n,winID=p1,tol=tol1)
   endif
   
 end subroutine pynaff

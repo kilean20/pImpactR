@@ -12,17 +12,29 @@ import readTBT as _readTBT
 #=======================================================================
 #========= read turn by turn data ======================================
 #=======================================================================
-def readTBT(fID, ke, mass, freq):
+def readTBT(fID, ke, mass, freq, path='.'):
+  cwd=os.getcwd()
+  os.chdir(path)
   nturn,npt = _readTBT.get_tbtsize(fID)
-  return _readTBT.get_tbtdata(fID,nturn,npt,ke,mass,freq)
+  tbt = _readTBT.get_tbtdata(fID,nturn,npt,ke,mass,freq)
+  os.chdir(cwd)
+  return tbt
 
-def readTBTraw(fID, ke, mass, freq):
+def readTBTraw(fID, ke, mass, freq, path='.'):
+  cwd=os.getcwd()
+  os.chdir(path)
   nturn,npt = _readTBT.get_rawtbtsize(fID)
-  return _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
+  tbt = _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
+  os.chdir(cwd)
+  return tbt
   
-def readTBT_integral(fID):
+def readTBT_integral(fID, path='.'):
+  cwd=os.getcwd()
+  os.chdir(path)
   nturn,npt = _readTBT.get_tbtsize_integral(fID)
-  return _readTBT.get_tbtdata_integral(fID,nturn,npt)
+  tbt = _readTBT.get_tbtdata_integral(fID,nturn,npt)
+  os.chdir(cwd)
+  return tbt
 
 #=======================================================================
 #=======================================================================

@@ -10,18 +10,18 @@ module naffModule
   private :: fft_recursive, quadratic_interpolation
 contains
 
-subroutine naff(tune,amplitude,n_mode,x,winID,tol)
+subroutine naff(tune,amplitude,y,n_mode,x,n,winID,tol)
   implicit none
-  integer,   intent(in) :: n_mode
+  integer,   intent(in) :: n_mode,n
   real(8),   intent(out):: tune(n_mode)
   complex(8),intent(out):: amplitude(n_mode)
-  complex(8),intent(in) :: x(:)
+  complex(8),intent(in) :: x(n)
+  complex(8),intent(out):: y(n)
   integer,optional,intent(in) :: winID
   real(8),optional,intent(in) :: tol
-  complex(8) :: y(size(x)), ffty(size(x))
-  integer :: mode, N, j, iMax, closeMode
+  complex(8) :: ffty(n)
+  integer :: mode, j, iMax, closeMode
   real(8) :: closeTune
-  N = size(x)
   y(:) = x(:)
   if(present(winID)) then
     do mode=1,n_mode
@@ -68,7 +68,7 @@ end subroutine naff
 subroutine quadratic_interpolation(tune,amplitude,x,winID,tol)
   implicit none
   complex(8),intent(in) :: x(:)
-  complex(8),intent(inout):: amplitude
+  complex(8),intent(out):: amplitude
   real(8), intent(inout):: tune
   integer,optional,intent(in) :: winID
   real(8),optional,intent(in) :: tol
@@ -105,7 +105,19 @@ subroutine quadratic_interpolation(tune,amplitude,x,winID,tol)
   end select
   window = window/sum(window)
   
-  tuneStep = 0.7/dble(N)
+  ! ====  if FFT fails... ====
+  TuneScan(1) = tune-1.0/dble(N)
+  TuneScan(2) = tune
+  TuneScan(3) = tune+1.0/dble(N)
+  do i=1,3
+    dummy = exp(-i1*twopi*(TuneScan(i))*[(j,j=1,N)])
+    AmplitudeScan(i) = -abs(sum(dummy*x*window))
+  enddo
+  i = minloc(AmplitudeScan,1)
+  tune = TuneScan(i)
+  ! ==========================
+  
+  tuneStep = 1.6/dble(N)
   TuneScan(1) = tune-tuneStep
   TuneScan(2) = tune
   TuneScan(3) = tune+tuneStep
