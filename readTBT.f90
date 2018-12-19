@@ -33,6 +33,37 @@ subroutine get_TBTsize(fID,nturn,npt)
   close(iUnit)
 end subroutine get_TBTsize
 
+subroutine get_TBTsize_npt(fID,nturn,npt)
+  integer, intent(in) :: fID, nturn
+  integer, intent(out):: npt
+  
+  logical :: file_open 
+  integer :: i,iUnit,eastat
+  character(len=4) :: num2str
+  character(len=6), parameter :: fmt_ = "(I0)"
+  
+  
+  iUnit = 4692 
+  file_open = .true. 
+  loop0 : do while ( file_open ) 
+    iUnit = iUnit + 1 
+    inquire(iUnit, opened = file_open ) 
+  end do loop0
+  
+  write(num2str,fmt_) fID
+  OPEN(iUnit, file='TBT.'//trim(num2str), status='old', action='read', form='unformatted', position='rewind')
+
+  loop1 : DO i=1,nturn-1
+    READ(iUnit,iostat=eastat) npt
+    IF (eastat > 0) STOP 'IO-error'    
+    READ(iUnit,iostat=eastat)
+    READ(iUnit,iostat=eastat)
+  END DO loop1
+  READ(iUnit,iostat=eastat) npt
+  close(iUnit)
+end subroutine get_TBTsize_npt
+
+
 subroutine get_TBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   integer, intent(in) :: fID,nturn,npt
   integer, intent(out) :: pIndex(npt)
@@ -145,6 +176,38 @@ subroutine get_TBTsize_integral(fID,nturn,npt)
   close(iUnit)
 end subroutine get_TBTsize_integral
 
+subroutine get_TBTsize_npt_integral(fID,nturn,npt)
+  integer, intent(in) :: fID,nturn
+  integer, intent(out):: npt
+  
+  logical :: file_open 
+  integer :: i,iUnit,eastat
+  character(len=4) :: num2str
+  character(len=6), parameter :: fmt_ = "(I0)"
+  
+  
+  iUnit = 4692 
+  file_open = .true. 
+  loop0 : do while ( file_open ) 
+    iUnit = iUnit + 1 
+    inquire(iUnit, opened = file_open ) 
+  end do loop0
+  
+  write(num2str,fmt_) fID
+  OPEN(iUnit, file='TBT.integral.'//trim(num2str), status='old', action='read', form='unformatted', position='rewind')
+
+  loop1 : DO i=1,nturn-1
+    READ(iUnit,iostat=eastat)
+    IF (eastat > 0) STOP 'IO-error'
+    READ(iUnit,iostat=eastat)
+    READ(iUnit,iostat=eastat)
+  END DO loop1
+  READ(iUnit,iostat=eastat) npt
+  close(iUnit)
+end subroutine get_TBTsize_npt_integral
+
+
+
 subroutine get_TBTdata_integral(fID,nturn,npt,pIndex,Integral)
   integer, intent(in) :: fID,nturn,npt
   integer, intent(out) :: pIndex(npt)
@@ -244,6 +307,31 @@ subroutine get_rawTBTsize(fID,nturn,npt)
   END DO loop1
   close(iUnit)
 end subroutine get_rawTBTsize
+
+
+subroutine get_rawTBTsize_npt(fID,npt)
+  integer, intent(in) :: fID
+  integer, intent(out):: npt
+  
+  logical :: file_open 
+  integer :: i,iUnit,eastat
+  character(len=4) :: num2str
+  character(len=6), parameter :: fmt_ = "(I0)"
+  
+  
+  iUnit = 4692 
+  file_open = .true. 
+  loop0 : do while ( file_open ) 
+    iUnit = iUnit + 1 
+    inquire(iUnit, opened = file_open ) 
+  end do loop0
+  
+  write(num2str,fmt_) fID
+  OPEN(iUnit, file='TBT.'//trim(num2str), status='old', action='read', form='unformatted', position='rewind')
+
+  READ(iUnit,iostat=eastat) npt
+  close(iUnit)
+end subroutine get_rawTBTsize_npt
 
 
 subroutine get_rawTBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)

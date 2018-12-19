@@ -12,26 +12,40 @@ import readTBT as _readTBT
 #=======================================================================
 #========= read turn by turn data ======================================
 #=======================================================================
-def readTBT(fID, ke, mass, freq, path='.'):
+def readTBT(fID, ke, mass, freq, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
-  nturn,npt = _readTBT.get_tbtsize(fID)
+  
+  if nturn==None:
+    nturn,npt = _readTBT.get_tbtsize(fID)
+  else:
+    npt = _readTBT.get_tbtsize_npt(fID,nturn)
   tbt = _readTBT.get_tbtdata(fID,nturn,npt,ke,mass,freq)
   os.chdir(cwd)
   return tbt
 
-def readTBTraw(fID, ke, mass, freq, path='.'):
+def readTBTraw(fID, ke, mass, freq, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
-  nturn,npt = _readTBT.get_rawtbtsize(fID)
+  
+  if nturn==None:
+    nturn,npt = _readTBT.get_rawtbtsize(fID)
+  else:
+    npt = _readTBT.get_rawtbtsize_npt(fID,nturn)
+    
   tbt = _readTBT.get_rawtbtdata(fID,nturn,npt,ke,mass,freq)
   os.chdir(cwd)
   return tbt
   
-def readTBT_integral(fID, path='.'):
+def readTBT_integral(fID, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
-  nturn,npt = _readTBT.get_tbtsize_integral(fID)
+  
+  if nturn==None:
+    nturn,npt = _readTBT.get_tbtsize_integral(fID)
+  else:
+    npt = _readTBT.get_tbtsize_npt_integral(fID,nturn)
+
   tbt = _readTBT.get_tbtdata_integral(fID,nturn,npt)
   os.chdir(cwd)
   return tbt
