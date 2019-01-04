@@ -3,7 +3,7 @@ pi = 3.141592653589793
 twopi = 2.0*pi
 
 def defaultKeyVal(d,k,v):
-  if k not in d.keys():
+  if k in d.keys():
     return d[k]
   else:
     return v
@@ -90,8 +90,8 @@ class beam(dictClass) :
                 'betpx':0.0,
                 'emitx':0.0,
                 'CL'   :0.0,
-                'scalez'  :0.0,
-                'scalepz' :0.0,
+                'scalez'  :1.0,
+                'scalepz' :1.0,
                 'offsetz' :0.0,
                 'offsetpz':0.0
                 })
@@ -107,16 +107,16 @@ class beam(dictClass) :
                 'betz' :0.0,
                 'alfz' :0.0,
                 'emitz':0.0,
-                'scalex'  :0.0,
-                'scalepx' :0.0,
+                'scalex'  :1.0,
+                'scalepx' :1.0,
                 'offsetx' :0.0,
                 'offsetpx':0.0,
-                'scaley'  :0.0,
-                'scalepy' :0.0,
+                'scaley'  :1.0,
+                'scalepy' :1.0,
                 'offsety' :0.0,
                 'offsetpy':0.0,
-                'scalez'  :0.0,
-                'scalepz' :0.0,
+                'scalez'  :1.0,
+                'scalepz' :1.0,
                 'offsetz' :0.0,
                 'offsetpz':0.0
                 })
