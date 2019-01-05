@@ -12,6 +12,9 @@ import readTBT as _readTBT
 #=======================================================================
 #========= read turn by turn data ======================================
 #=======================================================================
+def intStr(eStr):
+  return int(float(eStr))
+
 def readTBT(fID, ke, mass, freq, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
@@ -527,7 +530,7 @@ def _str2elem(elemStr):
   output 
       elemDict = (dict) element dictionary 
   """
-  elemID=int(elemStr[3])
+  elemID=intStr(elemStr[3])
   try:
     data.elem_type[elemID]
   except:
@@ -536,16 +539,16 @@ def _str2elem(elemStr):
           ' is not listed in data.elem_type'+data.bcolors.END)
   if data.elem_type[elemID] == 'drift':
     elemDict = {'length'     : float(elemStr[0]),
-                'n_sckick'   : int(elemStr[1]),
-                'n_map'      : int(elemStr[2]),
+                'n_sckick'   : intStr(elemStr[1]),
+                'n_map'      : intStr(elemStr[2]),
                 'pipe_radius': float(elemStr[4])
                 }
   elif data.elem_type[elemID] == 'quad':
     elemDict = {'length'       : float(elemStr[0]),
-                'n_sckick'     : int  (elemStr[1]),
-                'n_map'        : int  (elemStr[2]),
+                'n_sckick'     : intStr(elemStr[1]),
+                'n_map'        : intStr(elemStr[2]),
                 'B1'           : float(elemStr[4]),
-                'file_id'      : int(float(elemStr[5])),
+                'file_id'      : intStr(elemStr[5]),
                 'pipe_radius'  : float(elemStr[6])}
     if len(elemStr)>=8:
                  elemDict['misalign_x']=float(elemStr[7])
@@ -560,8 +563,8 @@ def _str2elem(elemStr):
                  
   elif data.elem_type[elemID] == 'const_focusing':
     elemDict = { 'length'  : float(elemStr[0]),
-                 'n_sckick': int  (elemStr[1]),
-                 'n_map'   : int  (elemStr[2]),
+                 'n_sckick': intStr(elemStr[1]),
+                 'n_map'   : intStr(elemStr[2]),
                  'kx2'     : float(elemStr[4]),
                  'ky2'     : float(elemStr[5]),
                  'kz2'     : float(elemStr[6]),
@@ -569,10 +572,10 @@ def _str2elem(elemStr):
                  
   elif data.elem_type[elemID] == 'solenoid':
     elemDict = { 'length'  : float(elemStr[0]),
-                 'n_sckick': int  (elemStr[1]),
-                 'n_map'   : int  (elemStr[2]),
+                 'n_sckick': intStr(elemStr[1]),
+                 'n_map'   : intStr(elemStr[2]),
                  'Bz'      : float(elemStr[4]),
-                 'file_id' : int(float(elemStr[5])),
+                 'file_id' : intStr(elemStr[5]),
                  'pipe_radius': float(elemStr[7])}
     if len(elemStr)>=9:
                  elemDict['misalign_x']=float(elemStr[8])
@@ -587,8 +590,8 @@ def _str2elem(elemStr):
                  
   elif data.elem_type[elemID] == 'dipole':
     elemDict = { 'length'       : float(elemStr[0]),
-                 'n_sckick'     : int(elemStr[1]), 
-                 'n_map'        : int(elemStr[2]), 
+                 'n_sckick'     : intStr(elemStr[1]), 
+                 'n_map'        : intStr(elemStr[2]), 
                  'bending_angle': float(elemStr[4]), 
                  'k1'           : float(elemStr[5]), 
                  'file_id'      : int(float(elemStr[6])),
@@ -625,8 +628,8 @@ def _str2elem(elemStr):
 
   elif data.elem_type[elemID] == 'nonlinear_insert':
     elemDict = { 'length'            : float(elemStr[0]),
-                 'n_sckick'          : int(elemStr[1]), 
-                 'n_map'             : int(elemStr[2]), 
+                 'n_sckick'          : intStr(elemStr[1]), 
+                 'n_map'             : intStr(elemStr[2]), 
                  'strength_t'        : float(elemStr[4]), 
                  'transverse_scale_c': float(elemStr[5]), 
                  'tune_advance'      : float(elemStr[6]),
@@ -635,8 +638,8 @@ def _str2elem(elemStr):
 
   elif data.elem_type[elemID] == 'DTL':
     elemDict= { 'length' : float(elemStr[0]),
-                'n_sckick': int(elemStr[1]), 
-                'n_map': int(elemStr[2]), 
+                'n_sckick': intStr(elemStr[1]), 
+                'n_map': intStr(elemStr[2]), 
                 'field_scaling': float(elemStr[4]), 
                 'frequency': float(elemStr[5]), 
                 'phase': float(elemStr[6]), 
@@ -657,8 +660,8 @@ def _str2elem(elemStr):
     
   elif data.elem_type[elemID] in ['CCDTL','CCL','SCRF','solenoidRF','EMfld']:
     elemDict= { 'length' : float(elemStr[0]),
-                'n_sckick': int(elemStr[1]), 
-                'n_map': int(elemStr[2]), 
+                'n_sckick': intStr(elemStr[1]), 
+                'n_map': intStr(elemStr[2]), 
                 'field_scaling': float(elemStr[4]),
                 'frequency': float(elemStr[5]),
                 'phase': float(elemStr[6]),
@@ -688,15 +691,15 @@ def _str2elem(elemStr):
     
   
   elif data.elem_type[elemID] == '-8':
-    elemDict= {'file_id': int(elemStr[2]),
-               'value'  : int(elemStr[4])}
+    elemDict= {'file_id': intStr(elemStr[2]),
+               'value'  : intStr(elemStr[4])}
 
   elif data.elem_type[elemID] in ['TBT',
                                   'write_raw_ptcl']:
-    elemDict= {'file_id': int(elemStr[2])}
+    elemDict= {'file_id': intStr(elemStr[2])}
     
   elif data.elem_type[elemID] == 'TBT_integral':
-    elemDict= {'file_id'           : int(elemStr[2]),
+    elemDict= {'file_id'           : intStr(elemStr[2]),
                'betx'              : float(elemStr[4]),
                'alfx'              : float(elemStr[5]),
                'strength_t'        : float(elemStr[6]), 
