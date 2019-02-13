@@ -9,7 +9,7 @@ import numpy as np
 try:
     import matplotlib.pyplot as plt
 except:
-    print 'matplotlib not found. plot module is disabled'
+    print('matplotlib not found. plot module is disabled')
 import os
 #%%############################################################################
 ##            internel class and function to layout lattice plot             ##
@@ -211,7 +211,7 @@ def _x_emittance(h, halo=None, fileDir='', plotRange=None, lattice_info=None):
         h2.plot(S,1-Y_halo/Y_emittance,'r--',alpha=0.5)
         h2.set_ylabel(r'$\mathsf{ \Delta \epsilon / \epsilon}$', fontsize=12)           
     elif isinstance(halo,int):
-        print '90,95,99% rms emittance is not calculate. IMPACT standard output flagg must be set to 2'
+        print('90,95,99% rms emittance is not calculate. IMPACT standard output flagg must be set to 2')
 
     if plotRange==None:
         h.set_xlim([s_min,s_max])
@@ -320,7 +320,7 @@ def _z_emittance(h, halo=None, fileDir='', plotRange=None, lattice_info=None):
         h2.plot(S,1-Z_halo/Z_emittance,'b--',alpha=0.5)
         h2.set_ylabel(r'$\mathsf{ \Delta \epsilon / \epsilon}$', fontsize=12)  
     elif isinstance(halo,int):
-        print '90,95,99% rms emittance is not calculate. IMPACT standard output flagg must be set to 2' 
+        print('90,95,99% rms emittance is not calculate. IMPACT standard output flagg must be set to 2')
         
     if plotRange==None:
         h.set_xlim([s_min,s_max])
@@ -761,40 +761,23 @@ def phase_space(fileID, ke, mass, freq, zSliced=True, nSlice=1,
 #%% density plot
 try:
     from scipy import stats
-    def poincare(X,Px, fname='poincare', xlabel=None, ylabel=None, iTurn=None, sigma=None, sampleRate=1, 
-                     xlim=None, ylim=None, ftsize=20, figsize=16, flagDensity=True, mksize=10):
-                
-        plt.rcParams['xtick.labelsize'] = ftsize-2
-        plt.rcParams['ytick.labelsize'] = ftsize-2
-        X=X[0::sampleRate];Px=Px[0::sampleRate]
-        fig=plt.figure(figsize=(figsize, figsize), dpi=240)
-        if flagDensity :
-            kernel = stats.gaussian_kde([X,Px])
-            cData = kernel.evaluate([X,Px])
-            plt.scatter(X,Px, c=cData, s=mksize, lw = 0)
-        else:
-            plt.scatter(X,Px, s=mksize, lw = 0)
-        if xlim!=None:
-            plt.xlim(-xlim,xlim)
-        if ylim!=None:        
-            plt.ylim(-ylim,ylim)
+    def poincare(X,Y, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
+        X=X[0::samplePeriod];Y=Y[0::samplePeriod]
+        kernel = stats.gaussian_kde([X,Y])
+        cData = kernel.evaluate([X,Y])
+        pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
+        if xlim==None:
+            xlim = [min(X),max(X)]
+        pltHandle.xlim(xlim[0],xlim[1])
+        if ylim==None:   
+            ylim = [min(Y),max(Y)]
+        pltHandle.ylim(ylim[0],ylim[1])
         if xlabel!=None:
-            plt.xlabel(xlabel, fontsize=ftsize)
+            pltHandle.xlabel(xlabel)
         if ylabel!=None:
-            plt.ylabel(ylabel, fontsize=ftsize)
-        if iTurn!=None:
-            plt.text(0.8*xlim,-0.8*ylim,iTurn,fontsize=ftsize-1)
-        if sigma!=None:
-            plt.text(0.55*xlim,0.8*ylim,np.around(sigma,decimals=3),fontsize=ftsize-1)
-        
-        plt.savefig(fname+'.png',format='png')
-        plt.savefig(fname+'.eps',format='eps')
-        fig.set_size_inches(1.5,1.5)
-        plt.tick_params(axis='both', which='major', labelsize=5)
-        plt.show()
-        plt.close()
+            pltHandle.ylabel(ylabel)
 except:
-    print 'scipy not found. plot.poincare module is disabled'
+    print('scipy not found. plot.poincare module is disabled')
 
         
         

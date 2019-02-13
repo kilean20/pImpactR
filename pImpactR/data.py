@@ -320,7 +320,7 @@ class beam(dictClass) :
 
       
 mass = dictClass({'electron'   :510998.9461,
-             'proton'     :938272081.3})
+                  'proton'     :938272081.3})
 
 distribution_type = dictClass({
                     1 :'Uniform'   ,
@@ -344,10 +344,10 @@ fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
                     8:'PIC_2D'                   })
 
 standard_output = dictClass({1:'standard output',
-                        2:'90,95,99 emittance output'})
+                             2:'90,95,99 emittance output'})
                     
 integrator = dictClass({1:'Linear'   ,
-                   2:'NonLinear'})
+                        2:'NonLinear'})
 
 elem_type = dictClass({0  :'drift'         ,
                   1  :'quad'          ,
@@ -356,6 +356,7 @@ elem_type = dictClass({0  :'drift'         ,
                   4  :'dipole'        ,
                   5  :'multipole_thin',
                   6  :'nonlinear_insert',
+                  7  :'smooth_focusing_nonlinear_insert',
                   101:'DTL'           ,
                   102:'CCDTL'         ,
                   103:'CCL'           ,
@@ -367,7 +368,7 @@ elem_type = dictClass({0  :'drift'         ,
                   -2 :'write_raw_ptcl',
                   -7 :'save4restart'  ,
                   -8 :'-8'            ,
-                  -16:'loop_through_lattice',
+                  -16:'loop',
                   -21:'centroid_shift',
                   -46:'linear_matrix_map',
                   -88:'TBT_integral',    # turn-by-turn

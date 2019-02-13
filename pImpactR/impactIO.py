@@ -58,8 +58,9 @@ def readTBT_integral(fID, nturn=None, path='.'):
 #=======================================================================
 def run(nCore=None,execfile='xmain'):
     """
-    ierr = run(nCore=None)
-    
+    ierr = run(nCore=None,execfile='xmain')
+    or
+    ierr = run(beam,execfile='xmain')    
     run IMPACTz
     infer the source code directly and modify 
     to change executable path
@@ -85,7 +86,16 @@ def getBeam(dist_type='Waterbag') :
 #%%============================================================================
 #                                   lattice                                  
 #==============================================================================
-
+def getLattice() : 
+  """
+  f = getLattice()
+  get a template (FODO lattce) of an lattice.  
+  output 
+      f = (list) list of elements
+  """
+  lattice = [getElem('loop'),getElem('quad'),getElem('drift'),getElem('quad'),getElem('drift')]
+  lattice[3].B1 = -lattice[3].B1
+  return lattice
 #%%#================================element====================================
 def getElem(type) : 
   """
@@ -165,14 +175,17 @@ def getElem(type) :
     elem.nonlinear_insert_length = 1.0
     elem.nonlinear_insert_tuneAdvance = 0.3
     elem.tune_advance = 0.0
-  elif type=='nonlinear_insert' :
+  elif type in ['nonlinear_insert','smooth_focusing_nonlinear_insert']  :
     elem.length = 1.0
     elem.n_sckick = 1
     elem.n_map = 1
     elem.strength_t = 0.0
     elem.transverse_scale_c = 0.003
-    elem.tune_advance = 0.3
     elem.pipe_radius = 1.0
+    if type == 'nonlinear_insert':
+      elem.tune_advance = 0.3
+    else:
+      elem.betx = 1.5
   elif type=='TBT_integral' :
     elem.strength_t = 0.0
     elem.transverse_scale_c = 0.003
@@ -181,7 +194,7 @@ def getElem(type) :
     elem.file_id = 1000
   elif type in ['TBT','write_raw_ptcl']:
     elem.file_id = 1000
-  elif type=='loop_through_lattice':
+  elif type=='loop':
     elem.turns = 1
   return elem
 
@@ -626,16 +639,19 @@ def _str2elem(elemStr):
                  'tune_advance' : float(elemStr[7]),
                 }
 
-  elif data.elem_type[elemID] == 'nonlinear_insert':
+  elif data.elem_type[elemID] in ['nonlinear_insert','smooth_focusing_nonlinear_insert']:
     elemDict = { 'length'            : float(elemStr[0]),
                  'n_sckick'          : intStr(elemStr[1]), 
                  'n_map'             : intStr(elemStr[2]), 
                  'strength_t'        : float(elemStr[4]), 
                  'transverse_scale_c': float(elemStr[5]), 
-                 'tune_advance'      : float(elemStr[6]),
                  'pipe_radius'       : float(elemStr[7])
                 }
-
+    if data.elem_type[elemID] == 'nonlinear_insert':
+       elemDict['tune_advance'] = float(elemStr[6])
+    else:
+      elemDict['betx'] = float(elemStr[6])
+      
   elif data.elem_type[elemID] == 'DTL':
     elemDict= { 'length' : float(elemStr[0]),
                 'n_sckick': intStr(elemStr[1]), 
@@ -655,7 +671,7 @@ def _str2elem(elemStr):
     if len(elemStr)>=15:
                  elemDict['misalign_y']=float(elemStr[14])
 
-  elif data.elem_type[elemID] == 'loop_through_lattice':
+  elif data.elem_type[elemID] == 'loop':
     elemDict = {'turns' : int(float(elemStr[5]))}
     
   elif data.elem_type[elemID] in ['CCDTL','CCL','SCRF','solenoidRF','EMfld']:
@@ -810,12 +826,15 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.nonlinear_insert_tuneAdvance)
     elemStr.append(elemDict.tune_advance)
 
-  elif elemDict.type == 'nonlinear_insert':
+  elif elemDict.type in ['nonlinear_insert','smooth_focusing_nonlinear_insert']:
     elemStr[1]=elemDict.n_sckick
     elemStr[2]=elemDict.n_map
     elemStr.append(elemDict.strength_t)
     elemStr.append(elemDict.transverse_scale_c)
-    elemStr.append(elemDict.tune_advance)
+    if elemDict.type == 'nonlinear_insert':
+      elemStr.append(elemDict.tune_advance)
+    else:
+      elemStr.append(elemDict.betx)
     elemStr.append(elemDict.pipe_radius)
 
   elif elemDict.type == 'DTL':
@@ -835,7 +854,7 @@ def _elem2str(elemDict):
       if 'misalign_y' in elemDict:
         elemStr.append(elemDict.misalign_y)
 
-  elif elemDict.type == 'loop_through_lattice':
+  elif elemDict.type == 'loop':
     elemStr.append(0.0)
     elemStr.append(elemDict.turns)
     

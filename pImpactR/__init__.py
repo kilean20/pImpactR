@@ -6,3 +6,4 @@ from impactIO import *
 import data
 import opt
 import util
+import plot
