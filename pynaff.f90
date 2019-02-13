@@ -11,8 +11,8 @@ subroutine pynaff(tune,amplitude,y,n_mode,x,n,window_id,tol)
   integer :: p1,maxiter1
   real(8) :: tol1
   !========== !!!do not remove!!! == f2py compiler directive ============
-  !f2py integer :: window_id = -10
-  !f2py real*8  :: tol = -10.0
+  !f2py integer :: window_id = 1
+  !f2py real*8  :: tol = 1.0d-3/n
   !======================================================================
   p1 = 1
   maxiter1 = 50
@@ -20,14 +20,8 @@ subroutine pynaff(tune,amplitude,y,n_mode,x,n,window_id,tol)
   if(present(window_id)) p1=window_id
   if(present(tol)) tol1=tol
 
-  if(p1==-10) then
-    if (tol1==-10.0) then
+  if(p1==1 .and. tol1 == 1.0d-3/n) then
       call naff(tune,amplitude,y,n_mode,x,n)
-    else
-      call naff(tune,amplitude,y,n_mode,x,n,tol=tol1)
-    endif
-  elseif(tol1==-10.0) then
-    call naff(tune,amplitude,y,n_mode,x,n,winID=p1)
   else
     call naff(tune,amplitude,y,n_mode,x,n,winID=p1,tol=tol1)
   endif

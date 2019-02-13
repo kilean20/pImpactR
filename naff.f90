@@ -11,6 +11,21 @@ module naffModule
 contains
 
 subroutine naff(tune,amplitude,y,n_mode,x,n,winID,tol)
+!=========================================================
+! Laskars NAFF algorithm with minor improvement
+! input
+!   x(n) : length n signal
+!   winID(optional)
+!   : 0 = rectangular window (=no window)
+!     1 = hanning window (1+cos(x))
+!     2 = (1+cos(x))^2
+!   tol(optional) tolderance 1.0e-4/n by default
+! output
+!   tune : measured tune
+!   amplitude : measured amplitude
+!   y : subtracted data
+!       y = x - Sum[amplitude[n]*exp(i*2pi*tune[n]*T),{n,1,n_mode}]
+!=========================================================
   implicit none
   integer,   intent(in) :: n_mode,n
   real(8),   intent(out):: tune(n_mode)
