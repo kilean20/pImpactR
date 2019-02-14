@@ -327,9 +327,8 @@ class DifferentialEvolutionSolver(object):
                 print("differential_evolution step %d: f(x)= %g"
                       % (self.niter,
                          self.population_energies[0]))
-                print("total population at step %d is %d"
-                %(self.niter, 
-                  len(self.population) )  )         
+                #print("total population at step %d is %d"
+                #%(self.niter, len(self.population) )  )         
                   
     def init_population_lhs(self):
         """
@@ -457,8 +456,8 @@ class DifferentialEvolutionSolver(object):
                 print("differential_evolution step %d: f(x)= %g"
                       % (nit,
                          self.population_energies[0]))
-                print("total population at step %d is %d"
-                %(nit, population_count )  ) 
+                # print("total population at step %d is %d"
+                # %(nit, population_count )  ) 
 
             if (self.callback and
                     self.callback(self._scale_parameters(self.population[0]),

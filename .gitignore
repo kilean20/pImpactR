@@ -1,4 +1,6 @@
 *.so
 *.pyc
+fort.*
+log.*
 pImpactR.egg-info/
 pImpactR/__pycache__/

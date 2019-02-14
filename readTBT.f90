@@ -4,8 +4,8 @@ subroutine get_TBTsize(fID,nturn,npt)
   
   logical :: file_open 
   integer :: iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -39,8 +39,8 @@ subroutine get_TBTsize_npt(fID,nturn,npt)
   
   logical :: file_open 
   integer :: i,iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -74,8 +74,8 @@ subroutine get_TBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   double precision :: x_norm, px_norm, gamma, beta
   integer, allocatable :: pIndexTmp(:)
   double precision, allocatable :: pDataTmp(:,:)
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   iUnit = 4692 
   file_open = .true. 
@@ -147,8 +147,8 @@ subroutine get_TBTsize_integral(fID,nturn,npt)
   
   logical :: file_open 
   integer :: iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -182,8 +182,8 @@ subroutine get_TBTsize_npt_integral(fID,nturn,npt)
   
   logical :: file_open 
   integer :: i,iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -217,8 +217,8 @@ subroutine get_TBTdata_integral(fID,nturn,npt,pIndex,Integral)
   double precision :: x_norm, px_norm, gamma, beta
   integer, allocatable :: pIndexTmp(:)
   double precision, allocatable :: intTmp(:,:)
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   iUnit = 4692 
   file_open = .true. 
@@ -276,8 +276,8 @@ subroutine get_rawTBTsize(fID,nturn,npt)
   
   logical :: file_open 
   integer :: iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -315,8 +315,8 @@ subroutine get_rawTBTsize_npt(fID,npt)
   
   logical :: file_open 
   integer :: i,iUnit,eastat
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   
   iUnit = 4692 
@@ -348,8 +348,8 @@ subroutine get_rawTBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   integer :: iUnit,eastat,mpt
   double precision :: x_norm, px_norm, gamma, beta
   double precision :: pDataTmp(6,npt)
-  character(len=4) :: num2str
-  character(len=6), parameter :: fmt_ = "(I0)"
+  character(len=6) :: num2str
+  character(len=8), parameter :: fmt_ = "(I0)"
   
   pData = 0d0
   iUnit = 4692 
