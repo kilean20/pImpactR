@@ -1148,6 +1148,7 @@ def readOpticsAt(sIndex,direction,fileLoc=''):
   f = readOptics(direction,fileLoc=fileLoc)
   for k,v in f.items():
     f[k] = v[sIndex]
+  return f
 
     
 def readLoss(nSkip=1,fileLoc=''):
