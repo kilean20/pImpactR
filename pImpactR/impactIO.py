@@ -238,16 +238,16 @@ def writeInputFile(beam,lattice,fname='test.in'):
       fname
   """
   if sum(beam.multi_charge.n_particles) != beam.n_particles:
-    print('input error <- sum(beam.multi_charge.n_particles) not qual to beam.n_particles')
+    #print('input error <- sum(beam.multi_charge.n_particles) not qual to beam.n_particles')
     if beam.multi_charge.n_states == 1:
-      print('  ... enforcing  beam.multi_charge.n_particles[0] to beam.n_particles')
+      #print('  ... enforcing  beam.multi_charge.n_particles[0] to beam.n_particles')
       beam.multi_charge.n_particles[0]=beam.n_particles
     else:
       raise ValueError('program terminating...')
       
   if beam.multi_charge.n_states == 1 and beam.multi_charge.current[0] != beam.current :
-    print('input error <- beam.multi_charge.current[0] not qual to beam.current')
-    print('  ... enforcing  beam.multi_charge.current[0] to beam.current')
+    #print('input error <- beam.multi_charge.current[0] not qual to beam.current')
+    #print('  ... enforcing  beam.multi_charge.current[0] to beam.current')
     beam.multi_charge.current[0] = beam.current
     
   beamStr = _beam2str(beam)
