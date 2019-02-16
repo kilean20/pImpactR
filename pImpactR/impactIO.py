@@ -186,14 +186,20 @@ def getElem(type) :
       elem.tune_advance = 0.3
     else:
       elem.betx = 1.5
-  elif type=='TBT_integral' :
+  elif type == 'TBT_integral' :
     elem.strength_t = 0.0
     elem.transverse_scale_c = 0.003
     elem.betx = 1.0
     elem.alfx = 0.0
     elem.file_id = 1000
-  elif type in ['TBT','write_raw_ptcl']:
+  elif type == 'TBT':
     elem.file_id = 1000
+    elem.turn = 1
+    elem.sample_period = 1
+  elif type == 'write_raw_ptcl':
+    elem.file_id = 1000
+    elem.turn = 1
+    elem.sample_period = 1
   elif type=='loop':
     elem.turns = 1
   return elem
@@ -376,14 +382,17 @@ def _str2beam(raw):
   i+=1
   print('......done')
   print('  : particle distribution info ..........',end='')
-  if distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
-    distribution.NL_t  = float(raw[i][0])
-    distribution.NL_c  = float(raw[i][1])
-    distribution.betx  = float(raw[i][2])
-    distribution.alfx  = -float(raw[i][3])/2.0
-    distribution.emitx = float(raw[i][4])
-    if distribution.distribution_type == 'IOTA_Gauss':
-      distribution.CL    = float(raw[i][5])
+  if distribution.distribution_type in ['ReadFile_binary','IOTA_Waterbag','IOTA_Gauss']:
+    if distribution.distribution_type == 'ReadFile_binary':
+      distribution.file_id  = float(raw[i][0])
+    else:
+      distribution.NL_t  = float(raw[i][0])
+      distribution.NL_c  = float(raw[i][1])
+      distribution.betx  = float(raw[i][2])
+      distribution.alfx  = -float(raw[i][3])/2.0
+      distribution.emitx = float(raw[i][4])
+      if distribution.distribution_type == 'IOTA_Gauss':
+        distribution.CL    = float(raw[i][5])
     i+=2
   else:
     distribution.sigmax  = float(raw[i][0])
@@ -471,17 +480,20 @@ def _beam2str(beam):
   #distribution = _twiss2impactdist(gamma,beam.frequency,beam.mass,beam.distribution)
   beam.twiss2impactdist()
   distribution = beam.distribution
-  if distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
-    temp = [distribution.NL_t,
-            distribution.NL_c,
-            distribution.betx,
-            -2.0*distribution.alfx,
-            distribution.emitx]
-    if distribution.distribution_type == 'IOTA_Gauss':
-      temp.append(distribution.CL)
+  if distribution.distribution_type in ['ReadFile_binary','IOTA_Waterbag','IOTA_Gauss']:
+    if distribution.distribution_type == 'ReadFile_binary':
+      temp = [distribution.file_id,0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     else:
+      temp = [distribution.NL_t,
+              distribution.NL_c,
+              distribution.betx,
+              -2.0*distribution.alfx,
+              distribution.emitx]
+      if distribution.distribution_type == 'IOTA_Gauss':
+        temp.append(distribution.CL)
+      else:
+        temp.append(0.0)
       temp.append(0.0)
-    temp.append(0.0)
     beamStr.append(temp)
     temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
@@ -710,17 +722,21 @@ def _str2elem(elemStr):
     elemDict= {'file_id': intStr(elemStr[2]),
                'value'  : intStr(elemStr[4])}
 
-  elif data.elem_type[elemID] in ['TBT',
-                                  'write_raw_ptcl']:
-    elemDict= {'file_id': intStr(elemStr[2])}
+  elif data.elem_type[elemID] == 'write_raw_ptcl':
+    elemDict= {'file_id': intStr(elemStr[2]),
+               'turn'   : intStr(elemStr[4])}
+    if len(elemStr)>=6:
+      elemDict['sample_period']=intStr(elemStr[5])
+            
+  elif data.elem_type[elemID] == 'TBT':
+    elemDict= {'file_id'           : intStr(elemStr[2])}
     
   elif data.elem_type[elemID] == 'TBT_integral':
     elemDict= {'file_id'           : intStr(elemStr[2]),
                'betx'              : float(elemStr[4]),
                'alfx'              : float(elemStr[5]),
                'strength_t'        : float(elemStr[6]), 
-               'transverse_scale_c': float(elemStr[7])}
-               
+               'transverse_scale_c': float(elemStr[7])}             
   else :
     elemDict= {}
   elemDict['type']   = data.elem_type[elemID]
@@ -878,9 +894,6 @@ def _elem2str(elemDict):
               elemStr.append(elemDict.rotation_z)
               if elemDict.type == 'solenoidRF':
                 elemStr.append(elemDict.Bz)
-               
-  elif elemDict.type in ['write_raw_ptcl','TBT']:
-    elemStr[2]=elemDict.file_id
 
   elif elemDict.type == 'centroid_shift':
     elemStr.append(1.0)
@@ -894,7 +907,15 @@ def _elem2str(elemDict):
   elif elemDict.type == '-8':
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.value)
+    
+  elif elemDict.type == 'write_raw_ptcl':
+    elemStr[2]=elemDict.file_id
+    elemStr.append(elemDict.turn)
+    elemStr.append(elemDict.sample_period)
 
+  elif elemDict.type == 'TBT':
+    elemStr[2]=elemDict.file_id
+    
   elif elemDict.type == 'TBT_integral':
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.betx)
@@ -945,13 +966,13 @@ def get_sIndex(s,fileloc=''):
     return i-1,rf.s[i-1]
 
     
-def readRMS(direction, nSkip=1,fileLoc=''):
+def readRMS(direction, sample_period=1,fileLoc=''):
   """
-  f = readRMS(direction,nSkip=1,fileLoc='')
+  f = readRMS(direction,sample_period=1,fileLoc='')
   Read RMS beam info
   input 
     direction = (char) 'x', 'y' or 'z'
-    nSkip = (int>0) number of lines to skip when reading output    
+    sample_period = (int>0) number of lines to skip when reading output    
   """
   if direction == 'x':
     file = open(fileLoc+'fort.24','r')
@@ -960,7 +981,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     f=data.dictClass({'s':[],'centroid_x':[],'rms_x':[],
                  'centroid_px':[],'rms_px':[],
                  'alfx':[],'emitx':[]})
-    for j in range(0,len(lines),nSkip) :
+    for j in range(0,len(lines),sample_period) :
       lines[j] = lines[j].split()
       f.s.append(float(lines[j][0]))
       f.centroid_x.append(float(lines[j][1]))
@@ -977,7 +998,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     f=data.dictClass({'s':[],'centroid_y':[],'rms_y':[],
                  'centroid_py':[],'rms_py':[],
                  'alfy':[],'emity':[]})
-    for j in range(0,len(lines),nSkip) :
+    for j in range(0,len(lines),sample_period) :
       lines[j] = lines[j].split()
       f.s.append(float(lines[j][0]))
       f.centroid_y.append(float(lines[j][1]))
@@ -994,7 +1015,7 @@ def readRMS(direction, nSkip=1,fileLoc=''):
     f=data.dictClass({'s':[],'centroid_z':[],'rms_z':[],
                  'centroid_pz':[],'rms_pz':[],
                  'alfz':[],'emitz':[]})
-    for j in range(0,len(lines),nSkip) :
+    for j in range(0,len(lines),sample_period) :
       lines[j] = lines[j].split()
       f.s.append(float(lines[j][0]))
       f.centroid_z.append(float(lines[j][1]))
@@ -1009,11 +1030,11 @@ def readRMS(direction, nSkip=1,fileLoc=''):
   
 def readRMS_at(sIndex,direction,fileLoc=''):
   """
-  f = readRMS_at(sIndex,direction,nSkip=1,fileLoc=''):
+  f = readRMS_at(sIndex,direction,sample_period=1,fileLoc=''):
   Read RMS beam size at location corresponds to sIndex
   input 
     direction = (char) 'x', 'y' or 'z'
-    nSkip = (int>0) number of lines to skip when reading output    
+    sample_period = (int>0) number of lines to skip when reading output    
   """
   if direction == 'x':
     file = open(fileLoc+'fort.24','r')
@@ -1056,9 +1077,9 @@ def readRMS_at(sIndex,direction,fileLoc=''):
   return f
 
 
-def readOptics(direction,nSkip=1,fileLoc=''):
+def readOptics(direction,sample_period=1,fileLoc=''):
   """
-  f = readOptics(direction,nSkip=1,fileLoc='')
+  f = readOptics(direction,sample_period=1,fileLoc='')
   Read Optics functions ( Optics ftn is calcualted using beam porfile)
   *** note that it is not optics of the lattice. 
       it is optics of the beam.
@@ -1066,10 +1087,10 @@ def readOptics(direction,nSkip=1,fileLoc=''):
       when large mismatch or space charge is present. ****
   input 
       direction = 'x' or 'y' or 'z'
-      nSkip  = sampling rate from beam distribution output file of IMPACTz
+      sample_period  = sampling period from beam distribution output file of IMPACTz
       fileLoc = (string) path
   output 
-      f = optics parameters at every (sampling rate of nSkip) integration step.
+      f = optics parameters at every (sample_period) integration step.
   """
   if direction == 'x':
     file = open(fileLoc+'fort.24','r')
@@ -1087,14 +1108,14 @@ def readOptics(direction,nSkip=1,fileLoc=''):
   ph = 0
   s0 = 0
   if direction == 'x':
-    j=nSkip-1
+    j=sample_period-1
     for i in range(len(lines)):
       s, sigmax, sigmap, alpha, emittance_norm = lines[i]
       beta = (1+alpha*alpha)**0.5 *sigmax/sigmap
       ph = ph + (s-s0)/beta
       s0 = s
       j+=1
-      if j==nSkip:
+      if j==sample_period:
         j=0
         f.s.append(s)
         f.betx.append(beta)
@@ -1102,14 +1123,14 @@ def readOptics(direction,nSkip=1,fileLoc=''):
         f.emitx.append(emittance_norm)
         f.phx.append(ph)
   elif direction == 'y':
-    j=nSkip-1
+    j=sample_period-1
     for i in range(len(lines)):
       s, sigmax, sigmap, alpha, emittance_norm = lines[i]
       beta = (1+alpha*alpha)**0.5 *sigmax/sigmap
       ph = ph + (s-s0)/beta
       s0 = s
       j+=1
-      if j==nSkip:
+      if j==sample_period:
         j=0
         f.s.append(s)
         f.bety.append(beta)
@@ -1117,14 +1138,14 @@ def readOptics(direction,nSkip=1,fileLoc=''):
         f.emity.append(emittance_norm)
         f.phy.append(ph)
   elif direction == 'z':
-    j=nSkip-1
+    j=sample_period-1
     for i in range(len(lines)):
       s, sigmax, sigmap, alpha, emittance_norm = lines[i]
       beta = (1+alpha*alpha)**0.5 *sigmax/sigmap*1.0e-6
       ph = ph + (s-s0)/beta
       s0 = s
       j+=1
-      if j==nSkip:
+      if j==sample_period:
         j=0
         f.s.append(s)
         f.betz.append(beta)
@@ -1135,7 +1156,7 @@ def readOptics(direction,nSkip=1,fileLoc=''):
   
 def readOpticsAt(sIndex,direction,fileLoc=''):
   """
-  f = readOpticsAt(sIndex,direction,nSkip=1,fileLoc='')
+  f = readOpticsAt(sIndex,direction,fileLoc='')
   Read Optics functions ( Optics ftn is calcualted using beam porfile)
   *** note that it is not optics of the lattice. 
       it is optics of the beam.
@@ -1151,12 +1172,12 @@ def readOpticsAt(sIndex,direction,fileLoc=''):
   return f
 
     
-def readLoss(nSkip=1,fileLoc=''):
+def readLoss(sample_period=1,fileLoc=''):
   file = open(fileLoc+'fort.32','r')
   lines = file.readlines()
   file.close()
   f=[]
-  for i in range(0,len(lines),nSkip) :
+  for i in range(0,len(lines),sample_period) :
     f.append( int(lines[i].split()[1]) )
   return f 
   

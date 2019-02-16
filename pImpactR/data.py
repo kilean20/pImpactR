@@ -146,6 +146,9 @@ class beam(dictClass) :
     param = dictClass({'distribution_type':twiss.distribution_type})
     param.mode = 'impactdist'
     
+    if param.distribution_type == 'ReadFile_binary' :
+      param.file_id = twiss.file_id
+    
     if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       if all (k in twiss.keys() for k in ('NL_t','NL_c')):
         param.NL_t = twiss.NL_t
@@ -251,6 +254,9 @@ class beam(dictClass) :
     twiss.offsetpz= param.offsetpz*pz_norm 
       
     # x,y
+    if param.distribution_type == 'ReadFile_binary':
+      twiss.file_id  = param.file_id  
+    
     if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       twiss.NL_t  = param.NL_t  
       twiss.NL_c  = param.NL_c  
@@ -329,6 +335,7 @@ distribution_type = dictClass({
                     4 :'SemiGauss' ,
                     5 :'KV'        ,
                     23:'ReadFile'  ,
+                   -23:'ReadFile_binary' ,
                     81:'IOTA_Waterbag'   ,
                     82:'IOTA_Gauss',
                     16:'Multi-charge-state Waterbag',
