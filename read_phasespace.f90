@@ -5,16 +5,18 @@ subroutine read_phasespace_size(fID,npt)
   
   if(fID>0) error stop 'Error <- get_raw_phasespace_size :: fID must be negative for binary phase-space output'
   OPEN(-fID, status='old', action='read', form='unformatted')
-  npt = 0
-  loop1 : DO
-    READ(-fID,iostat=eastat) 
-    IF (eastat < 0) THEN
-      EXIT loop1
-    ELSE IF (eastat > 0) THEN
-      error STOP 'IO-error'
-    ENDIF
-    npt = npt+1
-  END DO loop1
+  READ(-fID,iostat=eastat) npt
+  !
+  !npt = 0
+  !loop1 : DO
+  !  READ(-fID,iostat=eastat) 
+  !  IF (eastat < 0) THEN
+  !    EXIT loop1
+  !  ELSE IF (eastat > 0) THEN
+  !    error STOP 'IO-error'
+  !  ENDIF
+  !  npt = npt+1
+  !END DO loop1
   close(-fID)
 end subroutine read_phasespace_size
 
@@ -25,6 +27,7 @@ subroutine read_phasespace(fID,npt,pData)
   
   if(fID>0) error stop 'Error <- get_raw_phasespace_size :: fID must be negative for binary phase-space output'
   OPEN(-fID, status='old', action='read', form='unformatted')
+  READ(-fID,iostat=eastat) 
   DO i=1,npt
     READ(-fID,iostat=eastat) pData(1:9,i)
   END DO
