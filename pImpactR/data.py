@@ -378,6 +378,7 @@ elem_type = dictClass({0  :'drift'         ,
                   -16:'loop',
                   -21:'centroid_shift',
                   -46:'linear_matrix_map',
+                  -87:'TBT_integral_onMomentum',    # turn-by-turn
                   -88:'TBT_integral',    # turn-by-turn
                   -89:'TBT',  # turn-by-turn
                   -99:'halt'           })

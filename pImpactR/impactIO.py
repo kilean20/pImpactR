@@ -53,6 +53,19 @@ def readTBT_integral(fID, nturn=None, path='.'):
   os.chdir(cwd)
   return tbt
 
+def readTBT_integral_onMomentum(fID, nturn=None, path='.'):
+  cwd=os.getcwd()
+  os.chdir(path)
+  
+  if nturn==None:
+    nturn,npt = _readTBT.get_tbtsize_integral_onMomentum(fID)
+  else:
+    npt = _readTBT.get_tbtsize_npt_integral_onMomentum(fID,nturn)
+
+  tbt = _readTBT.get_tbtdata_integral_onMomentum(fID,nturn,npt)
+  os.chdir(cwd)
+  return tbt
+
 #=======================================================================
 #=======================================================================
 #=======================================================================
@@ -186,7 +199,7 @@ def getElem(type) :
       elem.tune_advance = 0.3
     else:
       elem.betx = 1.5
-  elif type == 'TBT_integral' :
+  elif type in ['TBT_integral','TBT_integral_onMomentum'] :
     elem.strength_t = 0.0
     elem.transverse_scale_c = 0.003
     elem.betx = 1.0
@@ -731,7 +744,7 @@ def _str2elem(elemStr):
   elif data.elem_type[elemID] == 'TBT':
     elemDict= {'file_id'           : intStr(elemStr[2])}
     
-  elif data.elem_type[elemID] == 'TBT_integral':
+  elif data.elem_type[elemID] in ['TBT_integral','TBT_integral_onMomentum']:
     elemDict= {'file_id'           : intStr(elemStr[2]),
                'betx'              : float(elemStr[4]),
                'alfx'              : float(elemStr[5]),
@@ -916,7 +929,7 @@ def _elem2str(elemDict):
   elif elemDict.type == 'TBT':
     elemStr[2]=elemDict.file_id
     
-  elif elemDict.type == 'TBT_integral':
+  elif elemDict.type in ['TBT_integral','TBT_integral_onMomentum']:
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.betx)
     elemStr.append(elemDict.alfx)
