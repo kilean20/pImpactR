@@ -761,7 +761,7 @@ def phase_space(fileID, ke, mass, freq, zSliced=True, nSlice=1,
 #%% density plot
 try:
     from scipy import stats
-    def poincare(X,Y, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
+    def density(X,Y, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
         X=X[0::samplePeriod];Y=Y[0::samplePeriod]
         kernel = stats.gaussian_kde([X,Y])
         cData = kernel.evaluate([X,Y])
@@ -777,7 +777,7 @@ try:
         if ylabel!=None:
             pltHandle.ylabel(ylabel)
 except:
-    print('scipy not found. plot.poincare module is disabled')
+    print('scipy not found. plot.density module is disabled')
 
         
         

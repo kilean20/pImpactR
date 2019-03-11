@@ -18,6 +18,9 @@ def intStr(eStr):
 def readTBT(fID, ke, mass, freq, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
+  if not os.path.isfile('TBT.'+str(fID)):
+    print('can not find <TBT.'+str(fID)+'> file')
+    return 'file error'
   
   if nturn==None:
     nturn,npt = _readTBT.get_tbtsize(fID)
@@ -43,6 +46,9 @@ def readTBTraw(fID, ke, mass, freq, nturn=None, path='.'):
 def readTBT_integral(fID, nturn=None, path='.'):
   cwd=os.getcwd()
   os.chdir(path)
+  if not os.path.isfile('TBT.integral.'+str(fID)):
+    print('can not find <TBT.integral.'+str(fID)+'> file')
+    return 'file error'
   
   if nturn==None:
     nturn,npt = _readTBT.get_tbtsize_integral(fID)
@@ -58,11 +64,11 @@ def readTBT_integral_onMomentum(fID, nturn=None, path='.'):
   os.chdir(path)
   
   if nturn==None:
-    nturn,npt = _readTBT.get_tbtsize_integral_onMomentum(fID)
+    nturn,npt = _readTBT.get_tbtsize_integral_onmomentum(fID)
   else:
-    npt = _readTBT.get_tbtsize_npt_integral_onMomentum(fID,nturn)
+    npt = _readTBT.get_tbtsize_npt_integral_onmomentum(fID,nturn)
 
-  tbt = _readTBT.get_tbtdata_integral_onMomentum(fID,nturn,npt)
+  tbt = _readTBT.get_tbtdata_integral_onmomentum(fID,nturn,npt)
   os.chdir(cwd)
   return tbt
 
@@ -188,7 +194,7 @@ def getElem(type) :
     elem.nonlinear_insert_length = 1.0
     elem.nonlinear_insert_tuneAdvance = 0.3
     elem.tune_advance = 0.0
-  elif type in ['nonlinear_insert','smooth_focusing_nonlinear_insert']  :
+  elif type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']  :
     elem.length = 1.0
     elem.n_sckick = 1
     elem.n_map = 1
@@ -664,7 +670,7 @@ def _str2elem(elemStr):
                  'tune_advance' : float(elemStr[7]),
                 }
 
-  elif data.elem_type[elemID] in ['nonlinear_insert','smooth_focusing_nonlinear_insert']:
+  elif data.elem_type[elemID] in ['nonlinear_insert','nonlinear_insert_smooth_focusing']:
     elemDict = { 'length'            : float(elemStr[0]),
                  'n_sckick'          : intStr(elemStr[1]), 
                  'n_map'             : intStr(elemStr[2]), 
@@ -855,7 +861,7 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.nonlinear_insert_tuneAdvance)
     elemStr.append(elemDict.tune_advance)
 
-  elif elemDict.type in ['nonlinear_insert','smooth_focusing_nonlinear_insert']:
+  elif elemDict.type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']:
     elemStr[1]=elemDict.n_sckick
     elemStr[2]=elemDict.n_map
     elemStr.append(elemDict.strength_t)
@@ -1217,7 +1223,7 @@ def normalizeParticleData(data, ke, mass, freq):
   f[:,2] = data[:,2]*x_norm
   f[:,3] = data[:,3]*px_norm
   f[:,4] = np.pi/180*data[:,4]
-  f[:,5] = data[:,5]/mass
+  f[:,5] = -data[:,5]/mass
   return f
     
 def unNormalizeParticleData(data, ke, mass, freq):
@@ -1231,15 +1237,20 @@ def unNormalizeParticleData(data, ke, mass, freq):
   f[:,2] = data[:,2]/x_norm
   f[:,3] = data[:,3]/px_norm
   f[:,4] = 180/np.pi*data[:,4]
-  f[:,5] = mass*data[:,5]
+  f[:,5] = -mass*data[:,5]
   return f
 
 def readParticleData(fileID, ke, mass, freq, fileLoc=''):
-    if fileID>0:
+    if isinstance(fileID, str):
+      data=np.loadtxt(fileID,skiprows=1)
+    elif fileID>0:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
     else:
       cPath = os.getcwd()
       os.chdir(cPath+fileLoc)
+      if not os.path.isfile('fort.'+str(-fileID)):
+        print('can not find <fort.'+str(-fileID)+'> file')
+        return 'file error'
       npt = _read_pdata.read_phasespace_size(fileID)
       data= np.transpose(_read_pdata.read_phasespace(fileID,npt))
       os.chdir(cPath)

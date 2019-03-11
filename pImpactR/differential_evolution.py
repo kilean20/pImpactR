@@ -68,10 +68,9 @@ def differential_evolution(func, bounds, strategy='rand1bin',
     maxiter : int, optional
         The maximum number of times the entire population is evolved.
         The maximum number of function evaluations is:
-        ``maxiter * popsize * len(x)``        
+        ``maxiter * popsize ``        
     popsize : int, optional
-        A multiplier for setting the total population size.  The population has
-        ``popsize * len(x)`` individuals.
+        population size.
     tol : float, optional
         When the mean of the population energies, multiplied by tol,
         divided by the standard deviation of the population energies
@@ -284,7 +283,7 @@ class DifferentialEvolutionSolver(object):
             self.population = prev_result.population
         else :
             self.niter = 1
-            self.population = np.zeros((popsize * parameter_count,
+            self.population = np.zeros((popsize,
                                         parameter_count))
             if init == 'latinhypercube':
                 self.init_population_lhs()

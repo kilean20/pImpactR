@@ -348,7 +348,8 @@ fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
                     5:'Trans:Rect,  Longi:open'  ,
                     6:'Trans:Rect,  Longi:perod' ,
                     7:'Symplectic_Spectral_2D'   ,
-                    8:'PIC_2D'                   })
+                    8:'PIC_2D'                   ,
+                    9:'Smooth_Focusing'})
 
 standard_output = dictClass({1:'standard output',
                              2:'90,95,99 emittance output'})
@@ -363,7 +364,7 @@ elem_type = dictClass({0  :'drift'         ,
                   4  :'dipole'        ,
                   5  :'multipole_thin',
                   6  :'nonlinear_insert',
-                  7  :'smooth_focusing_nonlinear_insert',
+                  9  :'nonlinear_insert_smooth_focusing',
                   101:'DTL'           ,
                   102:'CCDTL'         ,
                   103:'CCL'           ,
