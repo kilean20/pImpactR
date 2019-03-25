@@ -90,6 +90,10 @@ class beam(dictClass) :
                 'betpx':0.0,
                 'emitx':0.0,
                 'CL'   :0.0,
+                'offsetx' :0.0,
+                'offsetpx':0.0,
+                'offsety' :0.0,
+                'offsetpy':0.0,
                 'scalez'  :1.0,
                 'scalepz' :1.0,
                 'offsetz' :0.0,
@@ -148,11 +152,19 @@ class beam(dictClass) :
     
     if param.distribution_type == 'ReadFile_binary' :
       param.file_id = twiss.file_id
+      param.offsetx  = twiss.offsetx
+      param.offsetpx = twiss.offsetpx
+      param.offsety  = twiss.offsety
+      param.offsetpy = twiss.offsetpy
     
     if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       if all (k in twiss.keys() for k in ('NL_t','NL_c')):
         param.NL_t = twiss.NL_t
         param.NL_c = twiss.NL_c
+        param.offsetx  = twiss.offsetx
+        param.offsetpx = twiss.offsetpx
+        param.offsety  = twiss.offsety
+        param.offsetpy = twiss.offsetpy
       else:
         raise KeyError('NL_t and NL_c must be present in beam.distribution for '+ param.distribution_type +' dist_type')
       param.betx  = twiss.betx  
@@ -263,6 +275,10 @@ class beam(dictClass) :
       twiss.betx  = param.betx  
       twiss.betPx = param.betPx 
       twiss.emitx = param.emitx
+      twiss.offsetx  = param.offsetx
+      twiss.offsetpx = param.offsetpx
+      twiss.offsety  = param.offsety
+      twiss.offsetpy = param.offsetpy
       if param.distribution_type == 'IOTA_Gauss':
         twiss.CL  = param.CL
 

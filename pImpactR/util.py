@@ -8,6 +8,11 @@ Mp=938.2720813E6
 Me=0.510998910E6
 cLight=299792458 
 
+def RMSemittance(X,Px):
+    x  = X-np.mean(X)
+    px = Px-np.mean(Px)
+    return np.sqrt(np.var(x)*np.var(px)-np.mean(x*px)**2)
+
 def gamma(ke,mass):
     return ke/mass+1.0
     

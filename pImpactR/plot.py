@@ -776,6 +776,33 @@ try:
             pltHandle.xlabel(xlabel)
         if ylabel!=None:
             pltHandle.ylabel(ylabel)
+
+    def contour(x,y, pltHandle=plt):
+      """Draw a two dimensional kernel density plot.
+      You can specify either a figure or an axis to draw on.
+
+      Parameters:
+      -----------
+      x: 1D numpy array
+      y: 1D numpy array of same length with x
+
+      Returns:
+      --------
+      fig, ax: matplotlib figure and axis objects
+      """
+
+      x_min = x.min()
+      x_max = x.max()
+      y_min = y.min()
+      y_max = y.max()
+      X, Y = np.mgrid[x_min:x_max:200j, y_min:y_max:200j]
+      positions = np.vstack([X.ravel(), Y.ravel()])
+      values = np.vstack([x, y])
+      import scipy.stats as stats
+      kernel = stats.gaussian_kde(values)
+      Z = np.reshape(kernel(positions).T, X.shape)
+      pltHandle.contour(Z, extent=[x_min, x_max, y_min, y_max])
+            
 except:
     print('scipy not found. plot.density module is disabled')
 

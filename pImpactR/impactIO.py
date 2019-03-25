@@ -213,8 +213,6 @@ def getElem(type) :
     elem.file_id = 1000
   elif type == 'TBT':
     elem.file_id = 1000
-    elem.turn = 1
-    elem.sample_period = 1
   elif type == 'write_raw_ptcl':
     elem.file_id = 1000
     elem.turn = 1
@@ -403,7 +401,10 @@ def _str2beam(raw):
   print('  : particle distribution info ..........',end='')
   if distribution.distribution_type in ['ReadFile_binary','IOTA_Waterbag','IOTA_Gauss']:
     if distribution.distribution_type == 'ReadFile_binary':
-      distribution.file_id  = float(raw[i][0])
+      try:
+        distribution.file_id  = float(raw[i][0])
+      except:
+        print('file_id need to be provided in beam.distribution')
     else:
       distribution.NL_t  = float(raw[i][0])
       distribution.NL_c  = float(raw[i][1])
@@ -412,7 +413,12 @@ def _str2beam(raw):
       distribution.emitx = float(raw[i][4])
       if distribution.distribution_type == 'IOTA_Gauss':
         distribution.CL    = float(raw[i][5])
-    i+=2
+    i+=1
+    distribution.offsetx  = float(raw[i][0])
+    distribution.offsetpx = float(raw[i][1])
+    distribution.offsety  = float(raw[i][2])
+    distribution.offsetpy = float(raw[i][3])
+    i+=1
   else:
     distribution.sigmax  = float(raw[i][0])
     distribution.lambdax = float(raw[i][1])
@@ -514,7 +520,11 @@ def _beam2str(beam):
         temp.append(0.0)
       temp.append(0.0)
     beamStr.append(temp)
-    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    temp = [distribution.offsetx,
+            distribution.offsetpx,
+            distribution.offsety,
+            distribution.offsetpy,
+            0.0,0.0,0.0]
     beamStr.append(temp)
     temp = [distribution.sigmaz,
             distribution.lambdaz,
