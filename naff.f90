@@ -37,7 +37,7 @@ subroutine naff(tune,amplitude,y,n_mode,x,n,winID,tol)
   complex(8) :: ffty(n)
   integer :: mode, j, iMax, closeMode
   real(8) :: closeTune
-  y(:) = x(:)
+  y(:) = x(:) !- sum(x)/n
   if(present(winID)) then
     do mode=1,n_mode
       ffty = fft(y)
