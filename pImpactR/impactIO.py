@@ -8,6 +8,7 @@ import numbers
 import read_phasespace as _read_pdata
 import readTBT as _readTBT
 #======================
+int = np.vectorize(int)
 
 #=======================================================================
 #========= read turn by turn data ======================================
@@ -217,6 +218,10 @@ def getElem(type) :
     elem.file_id = 1000
     elem.turn = 1
     elem.sample_period = 1
+  elif type == 'pipe_overide':
+    elem.pipe_id = 1
+    elem.xmax = 1.0
+    elem.ymax = 1.0
   elif type=='loop':
     elem.turns = 1
   return elem
@@ -756,7 +761,12 @@ def _str2elem(elemStr):
                'turn'   : intStr(elemStr[4])}
     if len(elemStr)>=6:
       elemDict['sample_period']=intStr(elemStr[5])
-            
+
+  elif data.elem_type[elemID] == 'pipe_overide':
+    elemDict= {'pipe_id': intStr(elemStr[4]),
+               'xmax'   : intStr(elemStr[5]),
+               'ymax'   : intStr(elemStr[6])}
+
   elif data.elem_type[elemID] == 'TBT':
     elemDict= {'file_id'           : intStr(elemStr[2])}
     
@@ -941,9 +951,14 @@ def _elem2str(elemDict):
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.turn)
     elemStr.append(elemDict.sample_period)
-
+    
   elif elemDict.type == 'TBT':
     elemStr[2]=elemDict.file_id
+
+  elif elemDict.type == 'pipe_radius':
+    elemStr.append(elemDict.pipe_id)
+    elemStr.append(elemDict.xmax)
+    elemStr.append(elemDict.ymax)
     
   elif elemDict.type in ['TBT_integral','TBT_integral_onMomentum']:
     elemStr[2]=elemDict.file_id
@@ -1201,7 +1216,7 @@ def readOpticsAt(sIndex,direction,fileLoc=''):
   return f
 
     
-def readLoss(sample_period=1,fileLoc=''):
+def readLost(sample_period=1,fileLoc=''):
   file = open(fileLoc+'fort.32','r')
   lines = file.readlines()
   file.close()
@@ -1210,12 +1225,23 @@ def readLoss(sample_period=1,fileLoc=''):
     f.append( int(lines[i].split()[1]) )
   return f 
   
-def readLossAt(sIndex, fileLoc=''):
+def readLostAt(sIndex, fileLoc=''):
   file = open(fileLoc+'fort.32','r')
   lines = file.readlines()
   file.close()
   return int(lines[sIndex].split()[1])
 
+def readLost_detail(fileLoc=''):
+  tmp = np.loadtxt(fileLoc+'lost_partcl.data',skiprows=1)
+  f = data.dictClass()
+  f['z']=tmp[:,0]
+  f['x']=tmp[:,1]
+  f['y']=tmp[:,2]
+  f['particle_id']=int(tmp[:,3])
+  f['n_lost']=len(f.z)
+  f['elem_type']=(data.elem_type[int(tmp[i,4])] for i in range(f.n_lost))
+  f['n-th elem']=int(tmp[:,5])
+  return f
 
 #%%############################################################################
 ###############################################################################
