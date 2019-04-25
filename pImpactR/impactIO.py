@@ -8,7 +8,6 @@ import numbers
 import read_phasespace as _read_pdata
 import readTBT as _readTBT
 #======================
-int = np.vectorize(int)
 
 #=======================================================================
 #========= read turn by turn data ======================================
@@ -212,13 +211,17 @@ def getElem(type) :
     elem.betx = 1.0
     elem.alfx = 0.0
     elem.file_id = 1000
+    elem.pID_begin = 1
+    elem.pID_end = 100
   elif type == 'TBT':
     elem.file_id = 1000
+    elem.pID_begin = 1
+    elem.pID_end = 100
   elif type == 'write_raw_ptcl':
     elem.file_id = 1000
     elem.turn = 1
     elem.sample_period = 1
-  elif type == 'pipe_overide':
+  elif type == 'pipe_override':
     elem.pipe_id = 1
     elem.xmax = 1.0
     elem.ymax = 1.0
@@ -762,20 +765,24 @@ def _str2elem(elemStr):
     if len(elemStr)>=6:
       elemDict['sample_period']=intStr(elemStr[5])
 
-  elif data.elem_type[elemID] == 'pipe_overide':
+  elif data.elem_type[elemID] == 'pipe_override':
     elemDict= {'pipe_id': intStr(elemStr[4]),
                'xmax'   : intStr(elemStr[5]),
                'ymax'   : intStr(elemStr[6])}
 
   elif data.elem_type[elemID] == 'TBT':
-    elemDict= {'file_id'           : intStr(elemStr[2])}
+    elemDict= {'file_id'  : intStr(elemStr[4]),
+               'pID_begin': intStr(elemStr[5]),
+               'pID_end'  : intStr(elemStr[6])}
     
   elif data.elem_type[elemID] in ['TBT_integral','TBT_integral_onMomentum']:
-    elemDict= {'file_id'           : intStr(elemStr[2]),
-               'betx'              : float(elemStr[4]),
-               'alfx'              : float(elemStr[5]),
-               'strength_t'        : float(elemStr[6]), 
-               'transverse_scale_c': float(elemStr[7])}             
+    elemDict= {'file_id'           : intStr(elemStr[4]),
+               'betx'              : float(elemStr[5]),
+               'alfx'              : float(elemStr[6]),
+               'strength_t'        : float(elemStr[7]), 
+               'transverse_scale_c': float(elemStr[8]),
+               'pID_begin'         : intStr(elemStr[9]),
+               'pID_end'           : intStr(elemStr[10])}
   else :
     elemDict= {}
   elemDict['type']   = data.elem_type[elemID]
@@ -953,19 +960,23 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.sample_period)
     
   elif elemDict.type == 'TBT':
-    elemStr[2]=elemDict.file_id
+    elemStr.append(elemDict.file_id)
+    elemStr.append(elemDict.pID_begin)
+    elemStr.append(elemDict.pID_end)
 
-  elif elemDict.type == 'pipe_radius':
+  elif elemDict.type == 'pipe_override':
     elemStr.append(elemDict.pipe_id)
     elemStr.append(elemDict.xmax)
     elemStr.append(elemDict.ymax)
     
   elif elemDict.type in ['TBT_integral','TBT_integral_onMomentum']:
-    elemStr[2]=elemDict.file_id
+    elemStr.append(elemDict.file_id)
     elemStr.append(elemDict.betx)
     elemStr.append(elemDict.alfx)
     elemStr.append(elemDict.strength_t)
     elemStr.append(elemDict.transverse_scale_c)
+    elemStr.append(elemDict.pID_begin)
+    elemStr.append(elemDict.pID_end)
                 
   for i in range(len(elemStr)):
     elemStr[i] = str(elemStr[i])
@@ -1237,7 +1248,8 @@ def readLost_detail(fileLoc=''):
   f['z']=tmp[:,0]
   f['x']=tmp[:,1]
   f['y']=tmp[:,2]
-  f['particle_id']=int(tmp[:,3])
+  intvec = np.vectorize(int)
+  f['particle_id']=intvec(tmp[:,3])
   f['n_lost']=len(f.z)
   f['elem_type']=(data.elem_type[int(tmp[i,4])] for i in range(f.n_lost))
   f['n-th elem']=int(tmp[:,5])
