@@ -222,7 +222,7 @@ def getElem(type) :
     elem.turn = 1
     elem.sample_period = 1
   elif type == 'pipe_override':
-    elem.pipe_id = 1
+    elem.pipe_shape = 1
     elem.xmax = 1.0
     elem.ymax = 1.0
   elif type=='loop':
@@ -766,7 +766,7 @@ def _str2elem(elemStr):
       elemDict['sample_period']=intStr(elemStr[5])
 
   elif data.elem_type[elemID] == 'pipe_override':
-    elemDict= {'pipe_id': intStr(elemStr[4]),
+    elemDict= {'pipe_shape': data.pipe_shape[intStr(elemStr[4])],
                'xmax'   : intStr(elemStr[5]),
                'ymax'   : intStr(elemStr[6])}
 
@@ -965,7 +965,7 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.pID_end)
 
   elif elemDict.type == 'pipe_override':
-    elemStr.append(elemDict.pipe_id)
+    elemStr.append(data.pipe_shape.find_key(elemDict.pipe_shape))
     elemStr.append(elemDict.xmax)
     elemStr.append(elemDict.ymax)
     

@@ -373,7 +373,10 @@ standard_output = dictClass({1:'standard output',
 integrator = dictClass({1:'Linear'   ,
                         2:'NonLinear'})
 
-elem_type = dictClass({0  :'drift'         ,
+pipe_shape = dictClass({1:'rectangular',
+                        2:'elliptic'})
+
+elem_type = dictClass({0  :'drift'    ,
                   1  :'quad'          ,
                   2  :'const_focusing',
                   3  :'solenoid'      ,
