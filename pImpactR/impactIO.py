@@ -222,7 +222,7 @@ def getElem(type) :
     elem.turn = 1
     elem.sample_period = 1
   elif type == 'pipe_override':
-    elem.pipe_shape = 1
+    elem.pipe_shape = 'rectangular'
     elem.xmax = 1.0
     elem.ymax = 1.0
   elif type=='loop':
