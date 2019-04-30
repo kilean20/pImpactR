@@ -219,6 +219,7 @@ def getElem(type) :
     elem.pID_end = 100
   elif type == 'write_raw_ptcl':
     elem.file_id = 1000
+    elem.format_id = 0
     elem.turn = 1
     elem.sample_period = 1
   elif type == 'pipe_override':
@@ -760,10 +761,11 @@ def _str2elem(elemStr):
                'value'  : intStr(elemStr[4])}
 
   elif data.elem_type[elemID] == 'write_raw_ptcl':
-    elemDict= {'file_id': intStr(elemStr[2]),
-               'turn'   : intStr(elemStr[4])}
-    if len(elemStr)>=6:
-      elemDict['sample_period']=intStr(elemStr[5])
+    elemDict= {'file_id'  : intStr(elemStr[2]),
+               'format_id': intStr(elemStr[4]),
+               'turn'     : intStr(elemStr[5])}
+    if len(elemStr)>=7:
+      elemDict['sample_period']=intStr(elemStr[6])
 
   elif data.elem_type[elemID] == 'pipe_override':
     elemDict= {'pipe_shape': data.pipe_shape[intStr(elemStr[4])],
@@ -771,18 +773,18 @@ def _str2elem(elemStr):
                'ymax'   : intStr(elemStr[6])}
 
   elif data.elem_type[elemID] == 'TBT':
-    elemDict= {'file_id'  : intStr(elemStr[4]),
-               'pID_begin': intStr(elemStr[5]),
-               'pID_end'  : intStr(elemStr[6])}
+    elemDict= {'file_id'  : intStr(elemStr[2]),
+               'pID_begin': intStr(elemStr[4]),
+               'pID_end'  : intStr(elemStr[5])}
     
   elif data.elem_type[elemID] in ['TBT_integral','TBT_integral_onMomentum']:
-    elemDict= {'file_id'           : intStr(elemStr[4]),
-               'betx'              : float(elemStr[5]),
-               'alfx'              : float(elemStr[6]),
-               'strength_t'        : float(elemStr[7]), 
-               'transverse_scale_c': float(elemStr[8]),
-               'pID_begin'         : intStr(elemStr[9]),
-               'pID_end'           : intStr(elemStr[10])}
+    elemDict= {'file_id'           : intStr(elemStr[2]),
+               'betx'              : float(elemStr[4]),
+               'alfx'              : float(elemStr[5]),
+               'strength_t'        : float(elemStr[6]), 
+               'transverse_scale_c': float(elemStr[7]),
+               'pID_begin'         : intStr(elemStr[8]),
+               'pID_end'           : intStr(elemStr[9])}
   else :
     elemDict= {}
   elemDict['type']   = data.elem_type[elemID]
@@ -956,11 +958,13 @@ def _elem2str(elemDict):
     
   elif elemDict.type == 'write_raw_ptcl':
     elemStr[2]=elemDict.file_id
+    elemStr.append(elemDict.format_id)
     elemStr.append(elemDict.turn)
-    elemStr.append(elemDict.sample_period)
+    if 'sample_period' in elemDict:
+      elemStr.append(elemDict.sample_period)
     
   elif elemDict.type == 'TBT':
-    elemStr.append(elemDict.file_id)
+    elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.pID_begin)
     elemStr.append(elemDict.pID_end)
 
@@ -970,7 +974,7 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.ymax)
     
   elif elemDict.type in ['TBT_integral','TBT_integral_onMomentum']:
-    elemStr.append(elemDict.file_id)
+    elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.betx)
     elemStr.append(elemDict.alfx)
     elemStr.append(elemDict.strength_t)
