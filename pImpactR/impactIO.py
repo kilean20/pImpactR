@@ -1292,12 +1292,13 @@ def unNormalizeParticleData(data, ke, mass, freq):
   f[:,5] = -mass*data[:,5]
   return f
 
-def readParticleData(fileID, ke, mass, freq, fileLoc=''):
+def readParticleData(fileID, ke, mass, freq, format_id=0,fileLoc=''):
     if isinstance(fileID, str):
       data=np.loadtxt(fileID,skiprows=1)
-    elif fileID>0:
+    elif format_id=0:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
-    else:
+      return unNormalizeParticleData(data, ke, mass, freq)
+    elif format_id=1:
       cPath = os.getcwd()
       os.chdir(cPath+fileLoc)
       if not os.path.isfile('fort.'+str(-fileID)):
@@ -1306,7 +1307,9 @@ def readParticleData(fileID, ke, mass, freq, fileLoc=''):
       npt = _read_pdata.read_phasespace_size(fileID)
       data= np.transpose(_read_pdata.read_phasespace(fileID,npt))
       os.chdir(cPath)
-    return unNormalizeParticleData(data, ke, mass, freq)
+      return unNormalizeParticleData(data, ke, mass, freq)
+    elif format_id=2:
+      return
     
 def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc=''):
     """
