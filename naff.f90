@@ -7,7 +7,7 @@ module naffModule
   interface fft
     module procedure fft_r, fft_c
   end interface
-  private :: fft_recursive, quadratic_interpolation
+  private :: fft_r, fft_c, fft, fft_recursive, quadratic_interpolation
 contains
 
 subroutine naff(tune,amplitude,y,n_mode,x,n,winID,tol)

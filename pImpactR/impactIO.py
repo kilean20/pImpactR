@@ -5,8 +5,14 @@ import os
 import data
 import numbers
 #====f2py routines=====
-import read_phasespace as _read_pdata
-import readTBT as _readTBT
+try:
+  import read_phasespace as _read_pdata
+except:
+  print('binary particle data reading is not available')
+try:
+  import readTBT as _readTBT
+except:
+  print('binary turn-by-turn data reading is not available')
 #======================
 
 #=======================================================================
@@ -219,7 +225,7 @@ def getElem(type) :
     elem.pID_end = 100
   elif type == 'write_raw_ptcl':
     elem.file_id = 1000
-    elem.format_id = 0
+    elem.format_id = 1
     elem.turn = 1
     elem.sample_period = 1
   elif type == 'pipe_override':
@@ -1292,23 +1298,23 @@ def unNormalizeParticleData(data, ke, mass, freq):
   f[:,5] = -mass*data[:,5]
   return f
 
-def readParticleData(fileID, ke, mass, freq, format_id=0,fileLoc=''):
+def readParticleData(fileID, ke, mass, freq, format_id=1,fileLoc=''):
     if isinstance(fileID, str):
       data=np.loadtxt(fileID,skiprows=1)
-    elif format_id=0:
+    elif format_id==1:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
       return unNormalizeParticleData(data, ke, mass, freq)
-    elif format_id=1:
+    elif format_id==2:
       cPath = os.getcwd()
       os.chdir(cPath+fileLoc)
-      if not os.path.isfile('fort.'+str(-fileID)):
-        print('can not find <fort.'+str(-fileID)+'> file')
+      if not os.path.isfile('fort.'+str(fileID)):
+        print('can not find <fort.'+str(fileID)+'> file')
         return 'file error'
       npt = _read_pdata.read_phasespace_size(fileID)
       data= np.transpose(_read_pdata.read_phasespace(fileID,npt))
       os.chdir(cPath)
       return unNormalizeParticleData(data, ke, mass, freq)
-    elif format_id=2:
+    elif format_id==3:
       return
     
 def readParticleDataSliced(nSlice, fileID, ke, mass, freq, zSliced=True, fileLoc=''):

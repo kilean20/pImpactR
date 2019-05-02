@@ -1,5 +1,8 @@
 import numpy as np
-from pyNaff import pynaff as naff
+try:
+  from pyNaff import pynaff as naff
+except:
+  print('util.naff is not available')
 #from scipy import optimize
 #%%============================================================================
 #                                 beam physics                              

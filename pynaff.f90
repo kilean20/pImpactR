@@ -16,7 +16,7 @@ subroutine pynaff(tune,amplitude,y,n_mode,x,n,window_id,tol)
   !======================================================================
   p1 = 1
   maxiter1 = 50
-  tol1 = 1.0d-4/size(x)
+  tol1 = 1.0d-4/n
   if(present(window_id)) p1=window_id
   if(present(tol)) tol1=tol
 
