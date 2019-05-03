@@ -219,7 +219,7 @@ def getElem(type) :
     elem.file_id = 1000
     elem.pID_begin = 1
     elem.pID_end = 100
-  elif type in ['TBT','TBT_multiple_file']':
+  elif type in ['TBT','TBT_multiple_file']:
     elem.file_id = 1000
     elem.pID_begin = 1
     elem.pID_end = 100

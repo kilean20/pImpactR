@@ -351,7 +351,7 @@ distribution_type = dictClass({
                     4 :'SemiGauss' ,
                     5 :'KV'        ,
                     23:'ReadFile'  ,
-                   -23:'ReadFile_binary' ,
+                    40:'ReadFile_binary' ,
                     81:'IOTA_Waterbag'   ,
                     82:'IOTA_Gauss',
                     16:'Multi-charge-state Waterbag',
