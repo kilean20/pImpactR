@@ -219,10 +219,12 @@ def getElem(type) :
     elem.file_id = 1000
     elem.pID_begin = 1
     elem.pID_end = 100
-  elif type == 'TBT':
+  elif type in ['TBT','TBT_multiple_file']':
     elem.file_id = 1000
     elem.pID_begin = 1
     elem.pID_end = 100
+    if type == 'TBT_multiple_file':
+      elem.n_files = 1
   elif type == 'write_raw_ptcl':
     elem.file_id = 1000
     elem.format_id = 1
@@ -778,10 +780,12 @@ def _str2elem(elemStr):
                'xmax'   : intStr(elemStr[5]),
                'ymax'   : intStr(elemStr[6])}
 
-  elif data.elem_type[elemID] == 'TBT':
+  elif data.elem_type[elemID] in ['TBT','TBT_multiple_file']:
     elemDict= {'file_id'  : intStr(elemStr[2]),
                'pID_begin': intStr(elemStr[4]),
                'pID_end'  : intStr(elemStr[5])}
+    if data.elem_type[elemID] == 'TBT_multiple_file':
+      elemDict['n_files'] = intStr(elemStr[6])
     
   elif data.elem_type[elemID] in ['TBT_integral','TBT_integral_onMomentum']:
     elemDict= {'file_id'           : intStr(elemStr[2]),
@@ -969,10 +973,12 @@ def _elem2str(elemDict):
     if 'sample_period' in elemDict:
       elemStr.append(elemDict.sample_period)
     
-  elif elemDict.type == 'TBT':
+  elif elemDict.type in ['TBT','TBT_multiple_file']:
     elemStr[2]=elemDict.file_id
     elemStr.append(elemDict.pID_begin)
     elemStr.append(elemDict.pID_end)
+    if elemDict.type == 'TBT_multiple_file':
+      elemStr.append(elemDict.n_files)
 
   elif elemDict.type == 'pipe_override':
     elemStr.append(data.pipe_shape.find_key(elemDict.pipe_shape))

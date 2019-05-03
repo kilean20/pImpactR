@@ -66,13 +66,13 @@ end subroutine get_TBTsize_npt
 
 subroutine get_TBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
   integer, intent(in) :: fID,nturn,npt
-  integer, intent(out) :: pIndex(npt)
+  integer*8, intent(out) :: pIndex(npt)
   double precision, intent(in)  :: ke, mass, freq
   double precision, intent(out) :: pData(nturn,6,npt)
   logical :: file_open 
   integer :: iUnit,eastat,mpt
   double precision :: x_norm, px_norm, gamma, beta
-  integer, allocatable :: pIndexTmp(:)
+  integer*8, allocatable :: pIndexTmp(:)
   double precision, allocatable :: pDataTmp(:,:)
   character(len=6) :: num2str
   character(len=8), parameter :: fmt_ = "(I0)"
@@ -210,12 +210,12 @@ end subroutine get_TBTsize_npt_integral
 
 subroutine get_TBTdata_integral(fID,nturn,npt,pIndex,Integral)
   integer, intent(in) :: fID,nturn,npt
-  integer, intent(out) :: pIndex(npt)
+  integer*8, intent(out) :: pIndex(npt)
   double precision, intent(out) :: Integral(nturn,2,npt)
   logical :: file_open 
   integer :: iUnit,eastat,mpt
   double precision :: x_norm, px_norm, gamma, beta
-  integer, allocatable :: pIndexTmp(:)
+  integer*8, allocatable :: pIndexTmp(:)
   double precision, allocatable :: intTmp(:,:)
   character(len=6) :: num2str
   character(len=8), parameter :: fmt_ = "(I0)"
@@ -339,12 +339,12 @@ end subroutine get_TBTsize_npt_integral_onMomentum
 
 subroutine get_TBTdata_integral_onMomentum(fID,nturn,npt,pIndex,Integral)
   integer, intent(in) :: fID,nturn,npt
-  integer, intent(out) :: pIndex(npt)
+  integer*8, intent(out) :: pIndex(npt)
   double precision, intent(out) :: Integral(nturn,2,npt)
   logical :: file_open 
   integer :: iUnit,eastat,mpt
   double precision :: x_norm, px_norm, gamma, beta
-  integer, allocatable :: pIndexTmp(:)
+  integer*8, allocatable :: pIndexTmp(:)
   double precision, allocatable :: intTmp(:,:)
   character(len=6) :: num2str
   character(len=8), parameter :: fmt_ = "(I0)"
@@ -471,7 +471,7 @@ subroutine get_rawTBTdata(fID,nturn,npt,ke,mass,freq,pIndex,pData)
 ! not only alive (at the end) particle data
 !================================================================
   integer, intent(in) :: fID,nturn,npt
-  integer, intent(out) :: pIndex(nturn,npt)
+  integer*8, intent(out) :: pIndex(nturn,npt)
   double precision, intent(in)  :: ke, mass, freq
   double precision, intent(out) :: pData(nturn,6,npt)
   logical :: file_open 

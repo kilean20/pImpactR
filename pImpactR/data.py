@@ -402,6 +402,7 @@ elem_type = dictClass({0  :'drift'    ,
                   -87:'TBT_integral_onMomentum',    # turn-by-turn
                   -88:'TBT_integral',    # turn-by-turn
                   -89:'TBT',  # turn-by-turn
+                  -90:'TBT_multiple_file',  # turn-by-turn
                   -99:'halt'           })
 
 unit = dictClass({'length'       :'m',
