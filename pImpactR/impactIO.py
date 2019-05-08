@@ -416,26 +416,35 @@ def _str2beam(raw):
   i+=1
   print('......done')
   print('  : particle distribution info ..........',end='')
-  if distribution.distribution_type in ['ReadFile_binary','IOTA_Waterbag','IOTA_Gauss']:
-    if distribution.distribution_type == 'ReadFile_binary':
-      try:
-        distribution.file_id  = float(raw[i][0])
-      except:
-        print('file_id need to be provided in beam.distribution')
-    else:
-      distribution.NL_t  = float(raw[i][0])
-      distribution.NL_c  = float(raw[i][1])
-      distribution.betx  = float(raw[i][2])
-      distribution.alfx  = -float(raw[i][3])/2.0
-      distribution.emitx = float(raw[i][4])
-      if distribution.distribution_type == 'IOTA_Gauss':
-        distribution.CL    = float(raw[i][5])
+  if distribution.distribution_type == 'ReadFile':
+    i+=2
+  elif distribution.distribution_type == 'ReadFile_binary':
+    try:
+      distribution.file_id  = float(raw[i][0])
+    except:
+      print('file_id need to be provided in beam.distribution')
+    i+=2
+  elif distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
+    distribution.NL_t  = float(raw[i][0])
+    distribution.NL_c  = float(raw[i][1])
+    distribution.betx  = float(raw[i][2])
+    distribution.alfx  = -float(raw[i][3])/2.0
+    distribution.emitx = float(raw[i][4])
+    if distribution.distribution_type == 'IOTA_Gauss':
+      distribution.CL    = float(raw[i][5])
     i+=1
     distribution.offsetx  = float(raw[i][0])
     distribution.offsetpx = float(raw[i][1])
     distribution.offsety  = float(raw[i][2])
     distribution.offsetpy = float(raw[i][3])
     i+=1
+    distribution.sigmaz  = float(raw[i][0])
+    distribution.lambdaz = float(raw[i][1])
+    distribution.muz     = float(raw[i][2])
+    distribution.scalez  = float(raw[i][3])
+    distribution.scalepz = float(raw[i][4])
+    distribution.offsetz = float(raw[i][5])
+    distribution.offsetpz= float(raw[i][6])
   else:
     distribution.sigmax  = float(raw[i][0])
     distribution.lambdax = float(raw[i][1])
@@ -453,13 +462,13 @@ def _str2beam(raw):
     distribution.offsety = float(raw[i][5])
     distribution.offsetpy= float(raw[i][6])
     i+=1
-  distribution.sigmaz  = float(raw[i][0])
-  distribution.lambdaz = float(raw[i][1])
-  distribution.muz     = float(raw[i][2])
-  distribution.scalez  = float(raw[i][3])
-  distribution.scalepz = float(raw[i][4])
-  distribution.offsetz = float(raw[i][5])
-  distribution.offsetpz= float(raw[i][6])
+    distribution.sigmaz  = float(raw[i][0])
+    distribution.lambdaz = float(raw[i][1])
+    distribution.muz     = float(raw[i][2])
+    distribution.scalez  = float(raw[i][3])
+    distribution.scalepz = float(raw[i][4])
+    distribution.offsetz = float(raw[i][5])
+    distribution.offsetpz= float(raw[i][6])
   distribution.mode = 'impactdist'
   """ Reference Orbit """
   print('......done')
@@ -475,8 +484,9 @@ def _str2beam(raw):
   gamma = 1.0 + beam.kinetic_energy/beam.mass
   print('......done')
   print('  : converting impact dist to twiss param',end='')
-  beam.distribution = distribution 
-  beam.impactdist2twiss()
+  beam.distribution = distribution
+  if not distribution.distribution_type in ['ReadFile_binary','ReadFile']:
+    beam.impactdist2twiss()
   print('......done')
   return beam
 
@@ -519,23 +529,33 @@ def _beam2str(beam):
   
   '''Twiss'''
   gamma = 1.0 + beam.kinetic_energy/beam.mass
-  #distribution = _twiss2impactdist(gamma,beam.frequency,beam.mass,beam.distribution)
-  beam.twiss2impactdist()
   distribution = beam.distribution
-  if distribution.distribution_type in ['ReadFile_binary','IOTA_Waterbag','IOTA_Gauss']:
-    if distribution.distribution_type == 'ReadFile_binary':
-      temp = [distribution.file_id,0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  #distribution = _twiss2impactdist(gamma,beam.frequency,beam.mass,beam.distribution)
+  if distribution.distribution_type == 'ReadFile':
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    beamStr.append(temp)
+    beamStr.append(temp)
+    beamStr.append(temp)
+  elif distribution.distribution_type == 'ReadFile_binary':
+    temp = [distribution.file_id,0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    beamStr.append(temp)
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    beamStr.append(temp)
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    beamStr.append(temp)
+  elif distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
+    beam.twiss2impactdist()
+    distribution = beam.distribution
+    temp = [distribution.NL_t,
+            distribution.NL_c,
+            distribution.betx,
+            -2.0*distribution.alfx,
+            distribution.emitx]
+    if distribution.distribution_type == 'IOTA_Gauss':
+      temp.append(distribution.CL)
     else:
-      temp = [distribution.NL_t,
-              distribution.NL_c,
-              distribution.betx,
-              -2.0*distribution.alfx,
-              distribution.emitx]
-      if distribution.distribution_type == 'IOTA_Gauss':
-        temp.append(distribution.CL)
-      else:
-        temp.append(0.0)
       temp.append(0.0)
+    temp.append(0.0)
     beamStr.append(temp)
     temp = [distribution.offsetx,
             distribution.offsetpx,
