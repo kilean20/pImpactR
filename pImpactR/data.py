@@ -152,19 +152,25 @@ class beam(dictClass) :
     
     if param.distribution_type == 'ReadFile_binary' :
       param.file_id = twiss.file_id
-      param.offsetx  = twiss.offsetx
-      param.offsetpx = twiss.offsetpx
-      param.offsety  = twiss.offsety
-      param.offsetpy = twiss.offsetpy
+#       param.offsetx  = twiss.offsetx
+#       param.offsetpx = twiss.offsetpx
+#       param.offsety  = twiss.offsety
+#       param.offsetpy = twiss.offsetpy
     
     if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       if all (k in twiss.keys() for k in ('NL_t','NL_c')):
         param.NL_t = twiss.NL_t
         param.NL_c = twiss.NL_c
-        param.offsetx  = twiss.offsetx
-        param.offsetpx = twiss.offsetpx
-        param.offsety  = twiss.offsety
-        param.offsetpy = twiss.offsetpy
+        try:
+          param.offsetx  = twiss.offsetx
+          param.offsetpx = twiss.offsetpx
+          param.offsety  = twiss.offsety
+          param.offsetpy = twiss.offsetpy
+        except:
+          param.offsetx  = 0.0
+          param.offsetpx = 0.0
+          param.offsety  = 0.0
+          param.offsetpy = 0.0
       else:
         raise KeyError('NL_t and NL_c must be present in beam.distribution for '+ param.distribution_type +' dist_type')
       param.betx  = twiss.betx  
@@ -216,10 +222,10 @@ class beam(dictClass) :
       param.sigmaz = ( betz*emitz/(1.0+alfz*alfz) )**0.5/z_norm
       param.lambdaz = (emitz/betz)**0.5/pz_norm
     param.muz = alfz / (1.0+alfz*alfz)**0.5 
-    param.scalez  = twiss.scalez  
-    param.scalepz = twiss.scalepz 
-    param.offsetz = twiss.offsetz/z_norm
-    param.offsetpz= twiss.offsetpz/pz_norm
+    param.scalez  = defaultKeyVal(twiss,'scalez',1.0) #twiss.scalex  
+    param.scalepz = defaultKeyVal(twiss,'scalepz',1.0) #twiss.scalex  
+    param.offsetz = defaultKeyVal(twiss,'offsetz',0.0)/z_norm
+    param.offsetpz= defaultKeyVal(twiss,'offsetpz',0.0)/pz_norm
       
     self.distribution = param
 
