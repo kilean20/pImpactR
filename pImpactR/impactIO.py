@@ -201,11 +201,11 @@ def getElem(type) :
     elem.nonlinear_insert_tuneAdvance = 0.3
     elem.tune_advance = 0.0
   elif type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']  :
-    elem.length = 1.0
-    elem.n_sckick = 1
-    elem.n_map = 1
-    elem.strength_t = 0.0
-    elem.transverse_scale_c = 0.003
+    elem.length = 1.8
+    elem.n_sckick = 50
+    elem.n_map = 10
+    elem.strength_t = 0.4
+    elem.transverse_scale_c = 0.01
     elem.pipe_radius = 1.0
     if type == 'nonlinear_insert':
       elem.tune_advance = 0.3
@@ -213,7 +213,7 @@ def getElem(type) :
       elem.betx = 1.5
   elif type in ['TBT_integral','TBT_integral_onMomentum'] :
     elem.strength_t = 0.0
-    elem.transverse_scale_c = 0.003
+    elem.transverse_scale_c = 0.01
     elem.betx = 1.0
     elem.alfx = 0.0
     elem.file_id = 1000
@@ -534,7 +534,9 @@ def _beam2str(beam):
   if distribution.distribution_type == 'ReadFile':
     temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
   elif distribution.distribution_type == 'ReadFile_binary':
     temp = [distribution.file_id,0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -572,6 +574,8 @@ def _beam2str(beam):
             distribution.offsetpz]
     beamStr.append(temp)
   else:
+    beam.twiss2impactdist()
+    distribution = beam.distribution
     temp = [distribution.sigmax,
             distribution.lambdax,
             distribution.mux,
