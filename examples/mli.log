@@ -1,0 +1,62 @@
+--------------------------------------------------------------------------
+[[33338,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: cbp-64core
+
+Another transport will be used instead, although this may result in
+lower performance.
+--------------------------------------------------------------------------
+***************************************************************
+*                       MARYLIE/IMPACT                        *
+* Parallel Lie Algebraic Beam Dynamics Code with Space Charge *
+*                Last modified March 7, 2019                  *
+*     MaryLie copyright 1987, Alex J. Dragt, U. Maryland      *
+*     IMPACT copyright 2002, Robert D. Ryne, U. California    *
+***************************************************************
+Reading master input file mli.in                                                                          
+  
+ done reading BEAM parameters:
+ brho= 3.3526429140179725D-01
+ gamma= 1.9669280144029898D+02
+ beta= 9.9998707603185399D-01
+ energy, ekinetic= 1.00511005000E+08   1.00000000000E+08
+ pc= 1.00509705999E+08
+ mass, charge= 5.11005000000E+05  -1.00000000000E+00
+ beam current= 0.00000000000E+00
+ beam frequency= 0.00000000000E+00
+  
+ reading UNITS parameters
+ STATIC UNITS WILL BE USED. p0sc=  0.33526429140179725     
+ WARNING: scale length has not been specified
+ WARNING: scale time has not been specified
+ setting sl=1, omega=clite/sl
+ done reading UNITS parameters:
+ scale length (m) = 1.00000000000E+00
+ scale momentum = 3.35264291402E-01
+ scale time (sec)= 3.33564095198E-09
+ scale freq (Hz)= 4.77134515924E+07
+ scale angular freq (rad/sec)= 2.99792458000E+08
+  
+ global default parameters:
+ leading/trailing dipole fringe fields:           1           1
+ leading/trailing quadrupole fringe fields:           0           0
+ flag for exact tracking in drifts=           0
+ Data input complete; going into #labor.
+ Rewinding/reading particle data in file connected to unit           31
+ found            0  lines of header info
+ FOUND 6 numbers per record
+ found          10  particles in data file
+ WARNING: # of rays in input file =           10
+          current value of maxray =            0
+ setting maxray to           10  and allocating zblock
+ PE0 has rewound file w/ unit#           31
+ PE0 has read its own data
+ PE           0  retained           10  rays
+ closing particle initial condition file connected to unit           31
+ s=   0.0000000000000000       ;particledump to file rays.out                                                    
+ done. arclen=   0.0000000000000000     
+ sbendanglesum=   0.0000000000000000     
+ PE0 (system_clock)ELAPSED TIME=  0.13100000000000001     
+ PE0 (date_and_time)ELAPSED TIME=  0.13100000000122236     

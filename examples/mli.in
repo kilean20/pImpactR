@@ -1,0 +1,15 @@
+#menu 
+
+beam: beam, ekinetic=0.1, mass=0.0005110050000000001, charge=-1.0 
+units: units, type=static 
+setdefaults: globaldefaults, lfrngsbend=1, tfrngsbend=1, lfrngquad=0, tfrngquad=0, driftexact=0 
+testelem: thlm, k2l=100 
+raytrace: raytrace, file1=rays.in, type=readonly 
+particledump: particledump, file=rays.out, precision=9, close=false, flush=true, nunits=0 
+autotrack:autotrack, type=symplectic5 
+
+lattice, line=( testelem particledump ) 
+#labor
+raytrace
+autotrack
+lattice

@@ -1,0 +1,26 @@
+ nconst=          14
+    n    constr      conval
+           1 pi                                                             3.1415926535897931     
+           2 twopi                                                          6.2831853071795862     
+           3 clight                                                         299792458.00000000     
+           4 brho                                                          0.33526429140179725     
+           5 gamma                                                          196.69280144029898     
+           6 charge                                                        -1.0000000000000000     
+           7 mass                                                           511005.00000000012     
+           8 beta                                                          0.99998707603185399     
+           9 energy                                                         100511005.00000000     
+          10 ekinetic                                                       100000000.00000000     
+          11 pc                                                             100509705.99897304     
+          12 p0sc                                                          0.33526429140179725     
+          13 freqscl                                                        47713451.592369422     
+          14 omegascl                                                       299792458.00000000     
+  
+ na=           7
+ listing of n,nt1(n),nt2(n) for n=1,...,na
+   1    7   47 beam             beam                 1     1         10    1
+   2    7   48 units            units               11     2          5    2
+   3    7   78 globaldefaults   setdefaults         16     4          5    0
+   4    1   16 thlm             testelem            21     4         12    0
+   5    7   55 raytrace         raytrace            33     4         12    5
+   6    7   54 particledump     particledump        45     9          8    5
+   7    7   56 autotrack        autotrack           53    14          0    4
