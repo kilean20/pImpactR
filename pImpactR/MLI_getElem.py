@@ -379,7 +379,7 @@ class tmi(elemClass):
     """
     write map into file fort.ifile
     inputs:
-      M = matrix map (numpy array)
+      M = matrix map (numpy array or pandas DataFrame)
       G = generating polynomial (pandas DataFrame)
     """
     with open('fort.'+str(self.ifile),'w') as f:
@@ -387,9 +387,13 @@ class tmi(elemClass):
         for i in range(6):
           for j in range(6):
             f.write(str(i+1)+','+str(j+1)+', '+str(M[i,j])+'\n')
+      elif isinstance(M,pd.DataFrame):
+        for i in range(6):
+          for j in range(6):
+            f.write(str(i+1)+','+str(j+1)+', '+str(M.values[i,j])+'\n')
       if isinstance(G,pd.DataFrame):
         for i in range(len(G)):
-          f.write(str(G.iloc[i].name)+', '+str(G.iloc[i].value)+'\n')
+          f.write(str(G.iloc[i].name)+', '+str(G.iloc[i].GP)+'\n')
   
   
 class nlinsert(elemClass):
