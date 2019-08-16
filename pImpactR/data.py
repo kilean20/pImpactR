@@ -404,6 +404,7 @@ elem_type = dictClass({0  :'drift'    ,
                   -9 :'pipe_override' ,     
                   -16:'loop',
                   -21:'centroid_shift',
+                  -40:'RFkick',
                   -46:'linear_matrix_map',
                   -87:'TBT_integral_onMomentum',    # turn-by-turn
                   -88:'TBT_integral',    # turn-by-turn

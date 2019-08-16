@@ -787,6 +787,10 @@ def _str2elem(elemStr):
                'z' : float(elemStr[9]),
                'pz': float(elemStr[10])}
     
+  elif data.elem_type[elemID] == 'RFkick':
+    elemDict= {'vmax' : float(elemStr[5]),
+               'phi0': float(elemStr[6]),
+               'harmonic_number' : float(elemStr[7])}
   
   elif data.elem_type[elemID] == '-8':
     elemDict= {'file_id': intStr(elemStr[2]),
@@ -985,6 +989,14 @@ def _elem2str(elemDict):
     elemStr.append(elemDict.py)
     elemStr.append(elemDict.z)
     elemStr.append(elemDict.pz)
+  
+  
+  elif elemDict.type == 'RFkick':
+    elemStr.append(1.0)
+    elemStr.append(elemDict.vmax)
+    elemStr.append(elemDict.phi0)
+    elemStr.append(elemDict.harmonic_number)
+    
     
   elif elemDict.type == '-8':
     elemStr[2]=elemDict.file_id
