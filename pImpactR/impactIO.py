@@ -233,7 +233,7 @@ def getElem(type) :
   elif type == 'pipe_override':
     elem.pipe_shape = 'rectangular'
     elem.xmax = 1.0
-    elem.ymax = 1.0
+    elem.ymax = 1.0   
   elif type=='loop':
     elem.turns = 1
   return elem
@@ -807,6 +807,9 @@ def _str2elem(elemStr):
     elemDict= {'pipe_shape': data.pipe_shape[intStr(elemStr[4])],
                'xmax'   : intStr(elemStr[5]),
                'ymax'   : intStr(elemStr[6])}
+    
+  elif data.elem_type[elemID] == 'pipeinfo':
+    elemDict= {}
 
   elif data.elem_type[elemID] in ['TBT','TBT_multiple_file']:
     elemDict= {'file_id'  : intStr(elemStr[2]),

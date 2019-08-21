@@ -403,6 +403,7 @@ elem_type = dictClass({0  :'drift'    ,
                   -8 :'-8'            ,
                   -9 :'pipe_override' ,     
                   -16:'loop',
+                  -17:'pipeinfo',  # read pipe info from a file once for all
                   -21:'centroid_shift',
                   -40:'RFkick',
                   -46:'linear_matrix_map',
@@ -412,7 +413,8 @@ elem_type = dictClass({0  :'drift'    ,
                   -90:'TBT_multiple_file',  # turn-by-turn
                   -99:'halt'           })
 
-unit = dictClass({'length'       :'m',
+unit = dictClass({
+             'length'       :'m',
              'n_sckick'     :'1',
              'field_scaling':'1.0',
              'frequency'    :'Hz',
