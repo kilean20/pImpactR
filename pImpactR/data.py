@@ -248,9 +248,14 @@ class beam(dictClass) :
     twiss = dictClass({'distribution_type':param.distribution_type})
     twiss.mode = 'twiss'
     # z
-    z00 = param.sigmaz
-    z11 = param.lambdaz
-    z01 = param.muz
+    try:
+      z00 = param.sigmaz
+      z11 = param.lambdaz
+      z01 = param.muz
+    except:
+      z00 = 0
+      z11 = 0
+      z01 = 0
     alf = z01/(1.0-z01**2)**0.5
     if z00 == 0.0:
       if z11 != 0.0:
@@ -266,11 +271,16 @@ class beam(dictClass) :
     twiss.betz = beta # degree/MeV 
     twiss.alfz = alf
     twiss.emitz= emit  # degree-MeV 
-    twiss.scalez = param.scalez
-    twiss.scalepz= param.scalepz
-    twiss.offsetz = param.offsetz*z_norm
-    twiss.offsetpz= param.offsetpz*pz_norm 
-      
+    try:
+      twiss.scalez = param.scalez
+      twiss.scalepz= param.scalepz
+      twiss.offsetz = param.offsetz*z_norm
+      twiss.offsetpz= param.offsetpz*pz_norm 
+    except:
+      twiss.scalez = 0
+      twiss.scalepz= 0
+      twiss.offsetz = 0
+      twiss.offsetpz= 0
     # x,y
     if param.distribution_type == 'ReadFile_binary':
       twiss.file_id  = param.file_id  
