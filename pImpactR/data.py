@@ -99,6 +99,22 @@ class beam(dictClass) :
                 'offsetz' :0.0,
                 'offsetpz':0.0
                 })
+    elif dist_type == 'Gauss_trunc':
+      self.distribution = dictClass({
+                'distribution_type':dist_type,
+                'betx' :0.0,
+                'alfx' :0.0,
+                'emitx':0.0,
+                'bety' :0.0,
+                'alfy' :0.0,
+                'emity':0.0,
+                'betz' :0.0,
+                'alfz' :0.0,
+                'emitz':0.0,
+                'CLx'  :3.0,
+                'CLy'  :3.0,
+                'CLz'  :3.0
+                })
     else:
       self.distribution = dictClass({
                 'distribution_type':dist_type,
@@ -192,10 +208,14 @@ class beam(dictClass) :
         param.sigmax = (betx*(emitx/bg)/(1.0+alfx*alfx))**0.5/x_norm
         param.lambdax = ((emitx/bg)/betx)**0.5/px_norm
       param.mux = alfx / (1.0+alfx*alfx)**0.5 
-      param.scalex  = defaultKeyVal(twiss,'scalex',1.0) #twiss.scalex  
-      param.scalepx = defaultKeyVal(twiss,'scalepx',1.0) #twiss.scalepx 
-      param.offsetx = defaultKeyVal(twiss,'offsetx',0.0)/x_norm #twiss.offsetx/x_norm
-      param.offsetpx= defaultKeyVal(twiss,'offsetpx',0.0)/px_norm #twiss.offsetpx/px_norm
+      
+      if param.distribution_type == 'Gauss_trunc':
+        param.CLx = twiss.CLx
+      else:
+        param.scalex  = defaultKeyVal(twiss,'scalex',1.0) #twiss.scalex  
+        param.scalepx = defaultKeyVal(twiss,'scalepx',1.0) #twiss.scalepx 
+        param.offsetx = defaultKeyVal(twiss,'offsetx',0.0)/x_norm #twiss.offsetx/x_norm
+        param.offsetpx= defaultKeyVal(twiss,'offsetpx',0.0)/px_norm #twiss.offsetpx/px_norm
       
       bety  = twiss.bety
       emity = twiss.emity
@@ -207,10 +227,14 @@ class beam(dictClass) :
         param.sigmay = (bety*(emity/bg)/(1.0+alfy*alfy))**0.5/x_norm
         param.lambday = ((emity/bg)/bety)**0.5/px_norm
       param.muy = alfy / (1.0+alfy*alfy)**0.5 
-      param.scaley  = defaultKeyVal(twiss,'scaley',1.0) #twiss.scalex  
-      param.scalepy = defaultKeyVal(twiss,'scalepy',1.0) #twiss.scalepx 
-      param.offsety = defaultKeyVal(twiss,'offsety',0.0)/x_norm #twiss.offsetx/x_norm
-      param.offsetpy= defaultKeyVal(twiss,'offsetpy',0.0)/px_norm #twiss.offsetpx/px_norm
+      
+      if param.distribution_type == 'Gauss_trunc':
+        param.CLy = twiss.CLy
+      else:
+        param.scaley  = defaultKeyVal(twiss,'scaley',1.0) #twiss.scalex  
+        param.scalepy = defaultKeyVal(twiss,'scalepy',1.0) #twiss.scalepx 
+        param.offsety = defaultKeyVal(twiss,'offsety',0.0)/x_norm #twiss.offsetx/x_norm
+        param.offsetpy= defaultKeyVal(twiss,'offsetpy',0.0)/px_norm #twiss.offsetpx/px_norm
       
     betz  = twiss.betz
     emitz = twiss.emitz 
@@ -222,10 +246,14 @@ class beam(dictClass) :
       param.sigmaz = ( betz*emitz/(1.0+alfz*alfz) )**0.5/z_norm
       param.lambdaz = (emitz/betz)**0.5/pz_norm
     param.muz = alfz / (1.0+alfz*alfz)**0.5 
-    param.scalez  = defaultKeyVal(twiss,'scalez',1.0) #twiss.scalex  
-    param.scalepz = defaultKeyVal(twiss,'scalepz',1.0) #twiss.scalex  
-    param.offsetz = defaultKeyVal(twiss,'offsetz',0.0)/z_norm
-    param.offsetpz= defaultKeyVal(twiss,'offsetpz',0.0)/pz_norm
+    
+    if param.distribution_type == 'Gauss_trunc':
+      param.CLz = twiss.CLz
+    else:
+      param.scalez  = defaultKeyVal(twiss,'scalez',1.0) #twiss.scalex  
+      param.scalepz = defaultKeyVal(twiss,'scalepz',1.0) #twiss.scalex  
+      param.offsetz = defaultKeyVal(twiss,'offsetz',0.0)/z_norm
+      param.offsetpz= defaultKeyVal(twiss,'offsetpz',0.0)/pz_norm
       
     self.distribution = param
 
@@ -371,7 +399,8 @@ distribution_type = dictClass({
                     81:'IOTA_Waterbag'   ,
                     82:'IOTA_Gauss',
                     16:'Multi-charge-state Waterbag',
-                    17:'Multi-charge-state Gaussian'})
+                    17:'Multi-charge-state Gaussian',
+                    102:'Gauss_trunc'})
 
 fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
                     2:'Trans:open,  Longi:period',
@@ -415,6 +444,7 @@ elem_type = dictClass({0  :'drift'    ,
                   -16:'loop',
                   -17:'pipeinfo',  # read pipe info from a file once for all
                   -21:'centroid_shift',
+                  -31:'quad_hardedge',
                   -40:'RFkick',
                   -46:'linear_matrix_map',
                   -87:'TBT_integral_onMomentum',    # turn-by-turn
@@ -432,7 +462,7 @@ unit = dictClass({
              'charge'       :'e',
              'current'      :'A',
              'phase'        :'rad',
-             'B1'           :'T/m',
+             'Kx'           :'1/m^2',
              'pipe_radius'  :'m',
              'n_map'        :'1',
              'bending_angle':'rad',

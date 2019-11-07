@@ -93,16 +93,16 @@ def lattice(elemList=[],MLIline=[],impactBeam=None):
           f = getElem('quad')
           f.length = item.l
           if 'k1' in item.keys():
-            f.B1 = item.k1
+            f.Kx = item.k1
           elif 'g1' in item.keys():
             if brho==None:
               raise ValueError('impactBeam is required to convert quadrupole unit from MLI g1 to impact B1')
             else:
-              f.B1 = item.g1*brho
+              f.Kx = item.g1*brho
           else:
             print('quadrupole strength not found in the following MLI element:')
             print(item)
-            f.B1 = 0.0
+            f.Kx = 0.0
           f=[f]
         elif elem == 'thlm':
           f = getElem('multipole_thin')

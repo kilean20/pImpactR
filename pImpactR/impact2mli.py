@@ -34,7 +34,7 @@ def impact2mli(impatBeam,impactLattice,linename='impactLattice'):
       f = [getElem.drift(name='drift'+str(nDr),l=L)]
       nDr = nDr+1
     elif type == 'quad':
-      f = [getElem.quadrupole(name='quad'+str(nQuad),l=L,k1=elem.B1)]
+      f = [getElem.quadrupole(name='quad'+str(nQuad),l=L,k1=elem.Kx)]
       nQuad = nQuad+1
     elif type == 'multipole_thin':
       f = [getElem.thlm(name='thlm'+str(nThinMulti),k1l=elem.KL_quad,k2l=elem.KL_sext,k3l=elem.KL_oct)]

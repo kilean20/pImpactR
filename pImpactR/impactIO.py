@@ -81,7 +81,7 @@ def readTBT_integral_onMomentum(fID, nturn=None, path='.'):
 #=======================================================================
 #=======================================================================
 #=======================================================================
-def run(nCore=None,execfile='xmain'):
+def run(nCore=None,execfile=None,order=None):
     """
     ierr = run(nCore=None,execfile='xmain')
     or
@@ -89,7 +89,13 @@ def run(nCore=None,execfile='xmain'):
     run IMPACTz
     infer the source code directly and modify 
     to change executable path
-    """  
+    """
+    if execfile == None:
+      execfile = 'xmain'
+      if order ==3:
+        execfile = 'xmain3'
+      else:
+        execfile = 'xmain1'
     if nCore == None:
         return os.system(execfile+' > log.impact_std')
     elif isinstance(nCore,numbers.Integral) :
@@ -119,7 +125,7 @@ def getLattice() :
       f = (list) list of elements
   """
   lattice = [getElem('loop'),getElem('quad'),getElem('drift'),getElem('quad'),getElem('drift')]
-  lattice[3].B1 = -lattice[3].B1
+  lattice[3].Kx = -lattice[3].Kx
   return lattice
 #%%#================================element====================================
 def getElem(type) : 
@@ -146,7 +152,7 @@ def getElem(type) :
     elem.length = 0.1
     elem.n_sckick = 1
     elem.n_map = 1
-    elem.B1 = 10.0
+    elem.Kx = 10.0
     elem.file_id = 0
     elem.pipe_radius = 1.0
     elem.misalign_x = 0.0
@@ -154,6 +160,10 @@ def getElem(type) :
     elem.rotation_x = 0.0
     elem.rotation_y = 0.0
     elem.rotation_z = 0.0
+  elif type=='quad_hardedge' :
+    elem.n_map = 1
+    elem.Kx = 10.0
+    elem.flagEntrance = True
   elif type=='const_focusing' :
     elem.length = 0.1
     elem.n_sckick = 1
@@ -199,7 +209,8 @@ def getElem(type) :
   elif type=='linear_matrix_map' :
     elem.nonlinear_insert_length = 1.0
     elem.nonlinear_insert_tuneAdvance = 0.3
-    elem.tune_advance = 0.0
+    elem.tune_advance_x = 0.0
+    elem.tune_advance_y = 0.0
   elif type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']  :
     elem.length = 1.8
     elem.n_sckick = 50
@@ -449,26 +460,35 @@ def _str2beam(raw):
     distribution.sigmax  = float(raw[i][0])
     distribution.lambdax = float(raw[i][1])
     distribution.mux     = float(raw[i][2])
-    distribution.scalex  = float(raw[i][3])
-    distribution.scalepx = float(raw[i][4])
-    distribution.offsetx = float(raw[i][5])
-    distribution.offsetpx= float(raw[i][6])
+    if distribution.distribution_type == 'Gauss_trunc':
+      distribution.CLx   = float(raw[i][3])
+    else:
+      distribution.scalex  = float(raw[i][3])
+      distribution.scalepx = float(raw[i][4])
+      distribution.offsetx = float(raw[i][5])
+      distribution.offsetpx= float(raw[i][6])
     i+=1
     distribution.sigmay  = float(raw[i][0])
     distribution.lambday = float(raw[i][1])
     distribution.muy     = float(raw[i][2])
-    distribution.scaley  = float(raw[i][3])
-    distribution.scalepy = float(raw[i][4])
-    distribution.offsety = float(raw[i][5])
-    distribution.offsetpy= float(raw[i][6])
+    if distribution.distribution_type == 'Gauss_trunc':
+      distribution.CLy   = float(raw[i][3])
+    else:
+      distribution.scaley  = float(raw[i][3])
+      distribution.scalepy = float(raw[i][4])
+      distribution.offsety = float(raw[i][5])
+      distribution.offsetpy= float(raw[i][6])
     i+=1
     distribution.sigmaz  = float(raw[i][0])
     distribution.lambdaz = float(raw[i][1])
     distribution.muz     = float(raw[i][2])
-    distribution.scalez  = float(raw[i][3])
-    distribution.scalepz = float(raw[i][4])
-    distribution.offsetz = float(raw[i][5])
-    distribution.offsetpz= float(raw[i][6])
+    if distribution.distribution_type == 'Gauss_trunc':
+      distribution.CLz   = float(raw[i][3])
+    else:
+      distribution.scalez  = float(raw[i][3])
+      distribution.scalepz = float(raw[i][4])
+      distribution.offsetz = float(raw[i][5])
+      distribution.offsetpz= float(raw[i][6])
   distribution.mode = 'impactdist'
   """ Reference Orbit """
   print('......done')
@@ -573,6 +593,24 @@ def _beam2str(beam):
             distribution.offsetz,
             distribution.offsetpz]
     beamStr.append(temp)
+  elif distribution.distribution_type == 'Gauss_trunc':
+    beam.twiss2impactdist()
+    distribution = beam.distribution
+    temp = [distribution.sigmax,
+            distribution.lambdax,
+            distribution.mux,
+            distribution.CLx,0.0,0.0,0.0]
+    beamStr.append(temp)
+    temp = [distribution.sigmay,
+            distribution.lambday,
+            distribution.muy,
+            distribution.CLy,0.0,0.0,0.0]
+    beamStr.append(temp)
+    temp = [distribution.sigmaz,
+            distribution.lambdaz,
+            distribution.muz,
+            distribution.CLz,0.0,0.0,0.0]
+    beamStr.append(temp)
   else:
     beam.twiss2impactdist()
     distribution = beam.distribution
@@ -642,7 +680,7 @@ def _str2elem(elemStr):
     elemDict = {'length'       : float(elemStr[0]),
                 'n_sckick'     : intStr(elemStr[1]),
                 'n_map'        : intStr(elemStr[2]),
-                'B1'           : float(elemStr[4]),
+                'Kx'           : float(elemStr[4]),
                 'file_id'      : intStr(elemStr[5]),
                 'pipe_radius'  : float(elemStr[6])}
     if len(elemStr)>=8:
@@ -655,7 +693,13 @@ def _str2elem(elemStr):
                  elemDict['rotation_y']=float(elemStr[10])
     if len(elemStr)>=12:
                  elemDict['rotation_z']=float(elemStr[11])
-                 
+  elif data.elem_type[elemID] == 'quad_hardedge':
+    elemDict = {'n_map'        : intStr(elemStr[2]),
+                'Kx'           : float(elemStr[4])}
+    if float(elemStr[5])==0.0:
+      elemDict.flagEntrance = True
+    else:
+      elemDict.flagEntrance = False
   elif data.elem_type[elemID] == 'const_focusing':
     elemDict = { 'length'  : float(elemStr[0]),
                  'n_sckick': intStr(elemStr[1]),
@@ -718,7 +762,8 @@ def _str2elem(elemStr):
     elemDict = {
                  'nonlinear_insert_length' : float(elemStr[5]), 
                  'nonlinear_insert_tuneAdvance': float(elemStr[6]), 
-                 'tune_advance' : float(elemStr[7]),
+                 'tune_advance_x' : float(elemStr[7]),
+                 'tune_advance_y' : float(elemStr[8]),
                 }
 
   elif data.elem_type[elemID] in ['nonlinear_insert','nonlinear_insert_smooth_focusing']:
@@ -851,10 +896,10 @@ def _elem2str(elemDict):
     elemStr[2]=elemDict.n_map
     elemStr.append(elemDict.pipe_radius)
 
-  elif elemDict.type == 'quad':
+  elif elemDict.type in 'quad':
     elemStr[1]=elemDict.n_sckick
     elemStr[2]=elemDict.n_map
-    elemStr.append(elemDict.B1)
+    elemStr.append(elemDict.Kx)
     elemStr.append(elemDict.file_id)
     elemStr.append(elemDict.pipe_radius)
     if 'misalign_x' in elemDict:
@@ -868,6 +913,14 @@ def _elem2str(elemDict):
             if 'rotation_z' in elemDict:
               elemStr.append(elemDict.rotation_z)
               
+  elif elemDict.type == 'quad_hardedge':
+    elemStr[2]=elemDict.n_map
+    elemStr.append(elemDict.Kx)
+    if elemDict.flagEntrance == True:
+      elemStr.append(0.0)
+    else:
+      elemStr.append(1.0)
+      
   elif elemDict.type == 'const_focusing':
     elemStr[1]=elemDict.n_sckick
     elemStr[2]=elemDict.n_map
@@ -929,7 +982,8 @@ def _elem2str(elemDict):
     elemStr.append(0.0)
     elemStr.append(elemDict.nonlinear_insert_length)
     elemStr.append(elemDict.nonlinear_insert_tuneAdvance)
-    elemStr.append(elemDict.tune_advance)
+    elemStr.append(elemDict.tune_advance_x)
+    elemStr.append(elemDict.tune_advance_y)
 
   elif elemDict.type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']:
     elemStr[1]=elemDict.n_sckick
@@ -1427,10 +1481,10 @@ def writeParticleData(data, ke, mass, freq, fileLoc='',fname='partcl.data'):
     
 import pandas as __pd
     
-def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1e-8] ):
+def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0] ):
     """
     M = getTransferMap(lattice,q,mass,ke,freq,
-                       epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1e-9],
+                       epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
                        fname='test.in' )
     get linear transfer map (without space-charge)  by tracking 6 particles
     whose initial phase-space perturbation given by epsilon
@@ -1440,7 +1494,7 @@ def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1e-8] ):
         epsilon = 6 dimension array of perturbation for 
                   x,px,y,py, z*360/v/freq, E  in unit of 
                   [m],[rad],[m],[rad],[deg],[MeV]
-                  default : epsilon = [1e-e-8,1e-6,1e-8,1e-6,1e-7,1e-8]
+                  default : epsilon = [1e-e-8,1e-6,1e-8,1e-6,1e-7,1.0]
     """
     beam = copy(beamIn)
     beam.nCore_y=1
@@ -1481,3 +1535,63 @@ def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1e-8] ):
         for i in range(6):
             M[:,i] = dataOut[i,:]/epsilon[i]
     return __pd.DataFrame(M)
+  
+def clearLattice(lattice):
+  return [item for item in lattice 
+          if item.type not in ['write_raw_ptcl','save4restart','-8',
+                               'loop','pipeinfo','TBT_integral_onMomentum',
+                               'TBT_integral','TBT','TBT_multiple_file','halt']]
+  
+def getInverseLattice(lattice):
+  latticeB = copy(lattice[::-1])
+  latticeB = clearLattice(latticeB)
+  for elemB in latticeB:
+    if 'length' in elemB:
+        elemB.length = -elemB.length
+    if elemB.type == 'dipole':
+      elemB.bending_angle = -elemB.bending_angle
+      e1 = elemB.entrance_angle
+      e2 = elemB.exit_angle
+      elemB.entrance_angle= -e2
+      elemB.exit_angle    = -e1
+      elemB.fringe_field_integration = -elemB.fringe_field_integration
+    if elemB.type == 'multipole_thin':
+        elemB.KL_sext = -elemB.KL_sext
+    if elemB.type == 'linear_matrix_map':
+      elemB.tune_advance_x = -elemB.tune_advance_x
+      elemB.tune_advance_y = -elemB.tune_advance_y
+      elemB.nonlinear_insert_tuneAdvance = -elemB.nonlinear_insert_tuneAdvance
+      elemB.nonlinear_insert_length = -elemB.nonlinear_insert_length
+  return latticeB
+  
+  
+def getTwiss_from_pData(data):
+  varx = np.var(data[:,0])
+  varpx = np.var(data[:,1])
+  meanx = np.mean(data[:,0])
+  meanpx = np.mean(data[:,1])
+  sigmaxpx = np.mean((data[:,0]-meanx)*(data[:,1]-meanpx))
+  emitx = np.sqrt(varx*varpx - sigmaxpx*sigmaxpx)
+  betx = varx/emitx
+  alfx = np.sqrt(varpx/emitx*betx-1)
+  
+  varx = np.var(data[:,2])
+  varpx = np.var(data[:,3])
+  meanx = np.mean(data[:,2])
+  meanpx = np.mean(data[:,3])
+  sigmaxpx = np.mean((data[:,2]-meanx)*(data[:,3]-meanpx))
+  emity = np.sqrt(varx*varpx - sigmaxpx*sigmaxpx)
+  bety = varx/emity
+  alfy = np.sqrt(varpx/emity*bety-1)
+  
+  
+  varx = np.var(data[:,4])
+  varpx = np.var(data[:,5])
+  meanx = np.mean(data[:,4])
+  meanpx = np.mean(data[:,5])
+  sigmaxpx = np.mean((data[:,4]-meanx)*(data[:,5]-meanpx))
+  emitz = np.sqrt(varx*varpx - sigmaxpx*sigmaxpx)
+  betz = varx/emitz
+  alfz = np.sqrt(varpx/emitz*betz-1)
+  
+  return betx,alfx,emitx,bety,alfy,emity,betz*1.0e6,alfz,emitz*1.0e-6
