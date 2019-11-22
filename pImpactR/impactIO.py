@@ -443,7 +443,7 @@ def _str2beam(raw):
     distribution.NL_t  = float(raw[i][0])
     distribution.NL_c  = float(raw[i][1])
     distribution.betx  = float(raw[i][2])
-    distribution.alfx  = -float(raw[i][3])/2.0
+    distribution.alfx  = float(raw[i][3])
     distribution.emitx = float(raw[i][4])
     if distribution.distribution_type == 'IOTA_Gauss':
       distribution.CL    = float(raw[i][5])
@@ -609,7 +609,7 @@ def _beam2str(beam):
     temp = [distribution.NL_t,
             distribution.NL_c,
             distribution.betx,
-            -2.0*distribution.alfx,
+            distribution.alfx,
             distribution.emitx]
     if distribution.distribution_type == 'IOTA_Gauss':
       temp.append(distribution.CL)

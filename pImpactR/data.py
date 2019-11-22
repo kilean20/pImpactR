@@ -87,7 +87,7 @@ class beam(dictClass) :
                 'NL_t' :0.0,
                 'NL_c' :0.0,
                 'betx' :0.0,
-                'betpx':0.0,
+                'alfx':0.0,
                 'emitx':0.0,
                 'CL'   :0.0,
                 'offsetx' :0.0,
@@ -330,7 +330,7 @@ class beam(dictClass) :
       twiss.NL_t  = param.NL_t  
       twiss.NL_c  = param.NL_c  
       twiss.betx  = param.betx  
-      twiss.betPx = param.betPx 
+      twiss.alfx = param.alfx 
       twiss.emitx = param.emitx
       twiss.offsetx  = param.offsetx
       twiss.offsetpx = param.offsetpx
