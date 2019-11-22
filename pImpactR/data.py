@@ -115,6 +115,19 @@ class beam(dictClass) :
                 'CLy'  :3.0,
                 'CLz'  :3.0
                 })
+    elif dist_type == 'Thermal_trunc':
+      self.distribution = dictClass({
+                'distribution_type':dist_type,
+                'betx' :0.0,
+                'alfx' :0.0,
+                'bety' :0.0,
+                'alfy' :0.0,
+                'emitx':0.0,
+                'CL'   :3.0,
+                'betz' :0.0,
+                'alfz' :0.0,
+                'emitz':0.0,
+                })
     else:
       self.distribution = dictClass({
                 'distribution_type':dist_type,
@@ -166,14 +179,12 @@ class beam(dictClass) :
     param = dictClass({'distribution_type':twiss.distribution_type})
     param.mode = 'impactdist'
     
-    if param.distribution_type == 'ReadFile_binary' :
-      param.file_id = twiss.file_id
-#       param.offsetx  = twiss.offsetx
-#       param.offsetpx = twiss.offsetpx
-#       param.offsety  = twiss.offsety
-#       param.offsetpy = twiss.offsetpy
-    
-    if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
+    if param.distribution_type in ['ReadFile_binary','Thermal_trunc'] :
+      for key in twiss.keys():
+        if key != 'mode':
+          param[keys] = twiss[keys]
+      
+    elif param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       if all (k in twiss.keys() for k in ('NL_t','NL_c')):
         param.NL_t = twiss.NL_t
         param.NL_c = twiss.NL_c
@@ -310,10 +321,12 @@ class beam(dictClass) :
       twiss.offsetz = 0
       twiss.offsetpz= 0
     # x,y
-    if param.distribution_type == 'ReadFile_binary':
-      twiss.file_id  = param.file_id  
+    if param.distribution_type in ['ReadFile_binary','Thermal_trunc']:
+      for key in param.keys():
+        if key != 'mode':
+          twiss[keys] = param[keys]
     
-    if param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
+    elif param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       twiss.NL_t  = param.NL_t  
       twiss.NL_c  = param.NL_c  
       twiss.betx  = param.betx  
@@ -325,7 +338,7 @@ class beam(dictClass) :
       twiss.offsetpy = param.offsetpy
       if param.distribution_type == 'IOTA_Gauss':
         twiss.CL  = param.CL
-
+        
     else:
       x00 = param.sigmax
       x11 = param.lambdax
@@ -400,7 +413,8 @@ distribution_type = dictClass({
                     82:'IOTA_Gauss',
                     16:'Multi-charge-state Waterbag',
                     17:'Multi-charge-state Gaussian',
-                    102:'Gauss_trunc'})
+                    102:'Gauss_trunc',
+                    103:'Thermal_trunc'})
 
 fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
                     2:'Trans:open,  Longi:period',

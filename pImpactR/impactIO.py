@@ -81,27 +81,31 @@ def readTBT_integral_onMomentum(fID, nturn=None, path='.'):
 #=======================================================================
 #=======================================================================
 #=======================================================================
-def run(nCore=None,execfile=None,order=None):
+def run(beam=None,nCore=None,execfile=None,order=None):
     """
-    ierr = run(nCore=None,execfile='xmain')
+    ierr = run(nCore=None,execfile=None,order=None)
     or
-    ierr = run(beam,execfile='xmain')    
+    ierr = run(beam,execfile='xmain',order=None)
     run IMPACTz
     infer the source code directly and modify 
     to change executable path
     """
     if execfile == None:
-      execfile = 'xmain'
       if order ==3:
         execfile = 'xmain3'
       else:
         execfile = 'xmain1'
-    if nCore == None:
+        if order==None:
+          print('IMPACTz: linear dipoel finge model and linear drift propagator is assumed...')
+    if beam == None and nCore==None:
         return os.system(execfile+' > log.impact_std')
     elif isinstance(nCore,numbers.Integral) :
         return os.system('mpirun -n '+str(nCore) + ' ' + execfile +' > log.impact_std')
     else:
-        return os.system('mpirun -n '+str(nCore.nCore_y*nCore.nCore_z) + ' ' + execfile +' > log.impact_std')
+        try:
+          return os.system('mpirun -n '+str(beam.nCore_y*beam.nCore_z) + ' ' + execfile +' > log.impact_std')
+        except:
+          raise ValueError('unspecified nCore or unknown beam type')
 ###############################################################################
 ###############################################################################
 ###                      IMPACT INPUT GENERATOR                             ###
@@ -456,6 +460,21 @@ def _str2beam(raw):
     distribution.scalepz = float(raw[i][4])
     distribution.offsetz = float(raw[i][5])
     distribution.offsetpz= float(raw[i][6])
+  elif distribution.distribution_type == 'Thermal_trunc':
+    distribution.betx  = float(raw[i][0])
+    distribution.bety  = float(raw[i][1])
+    distribution.alfx  = float(raw[i][2])
+    distribution.alfy  = float(raw[i][3])
+    distribution.emitx = float(raw[i][4])
+    distribution.CL    = float(raw[i][5])
+    i+=2
+    distribution.sigmaz  = float(raw[i][0])
+    distribution.lambdaz = float(raw[i][1])
+    distribution.muz     = float(raw[i][2])
+    distribution.scalez  = float(raw[i][3])
+    distribution.scalepz = float(raw[i][4])
+    distribution.offsetz = float(raw[i][5])
+    distribution.offsetpz= float(raw[i][6])
   else:
     distribution.sigmax  = float(raw[i][0])
     distribution.lambdax = float(raw[i][1])
@@ -565,6 +584,25 @@ def _beam2str(beam):
     beamStr.append(temp)
     temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
+  elif distribution.distribution_type == 'Thermal_trunc':
+    temp = [distribution.betx,
+            distribution.bety,
+            distribution.alfx,
+            distribution.alfy,
+            distribution.emitx,
+            distribution.CL]
+    beamStr.append(temp)
+    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    beamStr.append(temp)
+    temp = [distribution.sigmaz,
+            distribution.lambdaz,
+            distribution.muz,
+            distribution.scalez,
+            distribution.scalepz,
+            distribution.offsetz,
+            distribution.offsetpz]
+    beamStr.append(temp)
+    
   elif distribution.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
     beam.twiss2impactdist()
     distribution = beam.distribution
