@@ -588,6 +588,7 @@ def _beam2str(beam):
     temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
   elif distribution.distribution_type == 'Exponential2D_trunc':
+    beam.twiss2impactdist()
     temp = [distribution.betx,
             distribution.alfx,
             distribution.emitx,
