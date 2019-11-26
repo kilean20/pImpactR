@@ -184,7 +184,7 @@ class beam(dictClass) :
     if param.distribution_type in ['ReadFile_binary','Exponential2D_trunc'] :
       for key in twiss.keys():
         if key != 'mode':
-          param[keys] = twiss[keys]
+          param[key] = twiss[key]
       
     elif param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       if all (k in twiss.keys() for k in ('NL_t','NL_c')):
@@ -326,7 +326,7 @@ class beam(dictClass) :
     if param.distribution_type in ['ReadFile_binary','Exponential2D_trunc']:
       for key in param.keys():
         if key != 'mode':
-          twiss[keys] = param[keys]
+          twiss[key] = param[key]
     
     elif param.distribution_type in ['IOTA_Waterbag','IOTA_Gauss']:
       twiss.NL_t  = param.NL_t  
