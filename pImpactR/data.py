@@ -115,15 +115,17 @@ class beam(dictClass) :
                 'CLy'  :3.0,
                 'CLz'  :3.0
                 })
-    elif dist_type == 'Thermal_trunc':
+    elif dist_type == 'Exponential2D_trunc':
       self.distribution = dictClass({
                 'distribution_type':dist_type,
                 'betx' :0.0,
                 'alfx' :0.0,
+                'emitx':0.0,
+                'CLx'  :3.0,
                 'bety' :0.0,
                 'alfy' :0.0,
-                'emitx':0.0,
-                'CL'   :3.0,
+                'emity':0.0,
+                'CLy'  :3.0,
                 'betz' :0.0,
                 'alfz' :0.0,
                 'emitz':0.0,
@@ -179,7 +181,7 @@ class beam(dictClass) :
     param = dictClass({'distribution_type':twiss.distribution_type})
     param.mode = 'impactdist'
     
-    if param.distribution_type in ['ReadFile_binary','Thermal_trunc'] :
+    if param.distribution_type in ['ReadFile_binary','Exponential2D_trunc'] :
       for key in twiss.keys():
         if key != 'mode':
           param[keys] = twiss[keys]
@@ -321,7 +323,7 @@ class beam(dictClass) :
       twiss.offsetz = 0
       twiss.offsetpz= 0
     # x,y
-    if param.distribution_type in ['ReadFile_binary','Thermal_trunc']:
+    if param.distribution_type in ['ReadFile_binary','Exponential2D_trunc']:
       for key in param.keys():
         if key != 'mode':
           twiss[keys] = param[keys]
@@ -414,17 +416,17 @@ distribution_type = dictClass({
                     16:'Multi-charge-state Waterbag',
                     17:'Multi-charge-state Gaussian',
                     102:'Gauss_trunc',
-                    103:'Thermal_trunc'})
+                    103:'Exponential2D_trunc'})
 
-fld_solver = dictClass( {1:'Trans:open,  Longi:open'  ,
-                    2:'Trans:open,  Longi:period',
-                    3:'Trans:Round, Longi:open'  ,
-                    4:'Trans:Round, Longi:perod' ,
-                    5:'Trans:Rect,  Longi:open'  ,
-                    6:'Trans:Rect,  Longi:perod' ,
-                    7:'Symplectic_Spectral_2D'   ,
-                    8:'PIC_2D'                   ,
-                    9:'Smooth_Focusing'})
+fld_solver = dictClass({1:'Trans:open,  Longi:open'  ,
+                        2:'Trans:open,  Longi:period',
+                        3:'Trans:Round, Longi:open'  ,
+                        4:'Trans:Round, Longi:perod' ,
+                        5:'Trans:Rect,  Longi:open'  ,
+                        6:'Trans:Rect,  Longi:perod' ,
+                        7:'Symplectic_Spectral_2D'   ,
+                        8:'PIC_2D'                   ,
+                        9:'Smooth_Focusing'})
 
 standard_output = dictClass({1:'standard output',
                              2:'90,95,99 emittance output'})

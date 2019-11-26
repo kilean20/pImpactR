@@ -460,14 +460,17 @@ def _str2beam(raw):
     distribution.scalepz = float(raw[i][4])
     distribution.offsetz = float(raw[i][5])
     distribution.offsetpz= float(raw[i][6])
-  elif distribution.distribution_type == 'Thermal_trunc':
+  elif distribution.distribution_type == 'Exponential2D_trunc':
     distribution.betx  = float(raw[i][0])
-    distribution.bety  = float(raw[i][1])
-    distribution.alfx  = float(raw[i][2])
-    distribution.alfy  = float(raw[i][3])
-    distribution.emitx = float(raw[i][4])
-    distribution.CL    = float(raw[i][5])
-    i+=2
+    distribution.alfx  = float(raw[i][1])
+    distribution.emitx = float(raw[i][2])
+    distribution.CLx   = float(raw[i][3])
+    i+=1
+    distribution.bety  = float(raw[i][0])
+    distribution.alfy  = float(raw[i][1])
+    distribution.emity = float(raw[i][2])
+    distribution.CLy   = float(raw[i][3])
+    i+=1
     distribution.sigmaz  = float(raw[i][0])
     distribution.lambdaz = float(raw[i][1])
     distribution.muz     = float(raw[i][2])
@@ -584,15 +587,16 @@ def _beam2str(beam):
     beamStr.append(temp)
     temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     beamStr.append(temp)
-  elif distribution.distribution_type == 'Thermal_trunc':
+  elif distribution.distribution_type == 'Exponential2D_trunc':
     temp = [distribution.betx,
-            distribution.bety,
             distribution.alfx,
-            distribution.alfy,
             distribution.emitx,
-            distribution.CL]
+            distribution.CLx]
     beamStr.append(temp)
-    temp = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    temp = [distribution.bety,
+            distribution.alfy,
+            distribution.emity,
+            distribution.CLy]
     beamStr.append(temp)
     temp = [distribution.sigmaz,
             distribution.lambdaz,
