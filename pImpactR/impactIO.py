@@ -593,12 +593,12 @@ def _beam2str(beam):
     temp = [distribution.betx,
             distribution.alfx,
             distribution.emitx,
-            distribution.CLx]
+            distribution.CLx,0.0,0.0,0.0]
     beamStr.append(temp)
     temp = [distribution.bety,
             distribution.alfy,
             distribution.emity,
-            distribution.CLy]
+            distribution.CLy,0.0,0.0,0.0]
     beamStr.append(temp)
     temp = [distribution.sigmaz,
             distribution.lambdaz,
