@@ -189,3 +189,58 @@ def SC_achromat_condition(lattice):
 #    def f(dx):
 #        return R*np.cos(0.5*np.pi-L/R)-(r+dx)*np.cos(0.5*np.pi-L/r)
 #    return optimize.brentq(f, 0, 0.05)  
+
+
+#%%============================================================================
+#                         pyNaff - rectangular window only, t=[0,T-1]
+#==============================================================================
+def pyNaff_full(nmode,signal):
+    """
+    tunes,amps,substracted_signals = pyNaff_full(nmode,signal)
+    
+    rectangular window only, 
+    t=[0,T-1]
+    amp = signal*np.exp(-2j*pi*tune*np.arange(T))
+    """
+    try:
+        import scipy.optimize as opt
+        from copy import deepcopy as copy
+    except:
+        print('util.pyNaff is not available')
+        
+    pi = np.pi
+    T = len(signal)
+    
+    def loss(tune,signal):
+        T = len(signal)
+        return -np.abs(np.sum(signal*np.exp(-2j*pi*tune*np.arange(T))))
+    
+    def getPeakInfo(signal):
+        T = len(signal)
+        tune = np.argmax(np.abs(np.fft.fft(signal)))/T
+        result = opt.minimize(loss,tune,args=(signal),method='Nelder-Mead')
+        return result
+    
+    
+    tunes = []
+    amps = []
+    subtracted_signals = []
+    
+    X = copy(signal)
+    for i in range(nmode):
+        result = getPeakInfo(X)
+        if result.message!='Optimization terminated successfully.':
+            print('Optimization failed at '+str(i+1)+'-th mode')
+            break
+        tunes.append(copy(result.x))
+        amps.append(np.sum(X*np.exp(-2j*pi*tunes[-1]*np.arange(T)))/T)
+        
+        X = X - amps[-1]*np.exp(2j*pi*tunes[-1]*np.arange(T))
+        subtracted_signals.append(copy(X))
+        
+    return tunes,amps,subtracted_signals
+
+
+def pyNaff(nmode,signal):
+    tunes,amps,subtracted_signals = pyNaff_full(nmode,signal)
+    return tunes,amps

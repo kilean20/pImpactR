@@ -765,7 +765,7 @@ try:
         X=X[0::samplePeriod];Y=Y[0::samplePeriod]
         kernel = stats.gaussian_kde([X,Y])
         cData = kernel.evaluate([X,Y])
-        pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
+        scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
         if xlim==None:
             xlim = [min(X),max(X)]
         pltHandle.xlim(xlim[0],xlim[1])
@@ -776,8 +776,9 @@ try:
             pltHandle.xlabel(xlabel)
         if ylabel!=None:
             pltHandle.ylabel(ylabel)
+        return scatter
 
-    def contour(x,y, pltHandle=plt):
+    def contour(x,y,levels=0,edge=True, pltHandle=plt):
       """Draw a two dimensional kernel density plot.
       You can specify either a figure or an axis to draw on.
 
@@ -801,7 +802,14 @@ try:
       import scipy.stats as stats
       kernel = stats.gaussian_kde(values)
       Z = np.reshape(kernel(positions).T, X.shape)
-      pltHandle.contour(Z, extent=[x_min, x_max, y_min, y_max])
+      if edge:
+        maxLevel = np.max(kernel)
+        levels = np.linspace(0.01*maxLevel,maxLevel,10)
+        return pltHandle.contour(Z, extent=[x_min, x_max, y_min, y_max],levels=levels)
+      if np.all(levels==0):
+        return pltHandle.contour(Z, extent=[x_min, x_max, y_min, y_max])
+      else:
+        return pltHandle.contour(Z, extent=[x_min, x_max, y_min, y_max],levels=levels)
             
 except:
     print('scipy not found. plot.density module is disabled')

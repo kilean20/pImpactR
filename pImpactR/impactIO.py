@@ -1585,6 +1585,26 @@ def clearLattice(lattice):
           if item.type not in ['write_raw_ptcl','save4restart','-8',
                                'loop','pipeinfo','TBT_integral_onMomentum',
                                'TBT_integral','TBT','TBT_multiple_file','halt']]
+
+def addHardEdgeQuad(lattice):
+    quadIndex = []
+    quadStr = []
+    for i,item in enumerate(lattice):
+        if item.type=='quad':
+            quadIndex.append(i)
+            quadStr.append(item.Kx)
+
+    for i,j in enumerate(quadIndex):
+        heqf1 = getElem('quad_hardedge')
+        heqf1.n_sckick = 100
+        heqf1.flagEntrance=True
+        heqf1.Kx = quadStr[i]
+        lattice.insert(j+2*i,heqf1)
+        heqf2 = copy(heqf1)
+        heqf2.flagEntrance=False
+        lattice.insert(j+2*i+2,heqf2)
+        
+    return lattice
   
 def getInverseLattice(lattice):
   latticeB = copy(lattice[::-1])

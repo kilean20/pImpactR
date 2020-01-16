@@ -394,6 +394,8 @@ class tmi(elemClass):
       if isinstance(G,pd.DataFrame):
         for i in range(len(G)):
           f.write(str(G.iloc[i].name)+', '+str(G.iloc[i].GP)+'\n')
+      else:
+        f.write('923, 0.0\n')
   
   
 class nlinsert(elemClass):
