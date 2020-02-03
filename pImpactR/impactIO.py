@@ -215,15 +215,18 @@ def getElem(type) :
     elem.nonlinear_insert_tuneAdvance = 0.3
     elem.tune_advance_x = 0.0
     elem.tune_advance_y = 0.0
-  elif type in ['nonlinear_insert','nonlinear_insert_smooth_focusing']  :
+  elif type in ['nonlinear_insert','nonlinear_insert_sliced','nonlinear_insert_smooth_focusing']  :
     elem.length = 1.8
     elem.n_sckick = 50
     elem.n_map = 10
     elem.strength_t = 0.4
     elem.transverse_scale_c = 0.01
     elem.pipe_radius = 1.0
-    if type == 'nonlinear_insert':
+    if type in ['nonlinear_insert','nonlinear_insert_sliced']:
       elem.tune_advance = 0.3
+      if type == 'nonlinear_insert_sliced':
+        elem.total_length = 1.8
+        elem.start_position = 0.0
     else:
       elem.betx = 1.5
   elif type in ['TBT_integral','TBT_integral_onMomentum'] :
@@ -822,7 +825,20 @@ def _str2elem(elemStr):
        elemDict['tune_advance'] = float(elemStr[6])
     else:
       elemDict['betx'] = float(elemStr[6])
-      
+
+  elif data.elem_type[elemID] == 'nonlinear_insert_sliced':
+    elemDict = { 'length'            : float(elemStr[0]),
+                 'n_sckick'          : intStr(elemStr[1]), 
+                 'n_map'             : intStr(elemStr[2]), 
+                 'strength_t'        : float(elemStr[4]), 
+                 'transverse_scale_c': float(elemStr[5]), 
+                 'tune_advance'      : float(elemStr[6]),
+                 'total_length'      : float(elemStr[7]),
+                 'start_position'    : float(elemStr[8]),
+                 'pipe_radius'       : float(elemStr[9]),
+                }
+
+    
   elif data.elem_type[elemID] == 'DTL':
     elemDict= { 'length' : float(elemStr[0]),
                 'n_sckick': intStr(elemStr[1]), 
@@ -1038,6 +1054,16 @@ def _elem2str(elemDict):
       elemStr.append(elemDict.tune_advance)
     else:
       elemStr.append(elemDict.betx)
+    elemStr.append(elemDict.pipe_radius)
+    
+  elif elemDict.type == 'nonlinear_insert_sliced':
+    elemStr[1]=elemDict.n_sckick
+    elemStr[2]=elemDict.n_map
+    elemStr.append(elemDict.strength_t)
+    elemStr.append(elemDict.transverse_scale_c)
+    elemStr.append(elemDict.tune_advance)
+    elemStr.append(elemDict.total_length)
+    elemStr.append(elemDict.start_position)
     elemStr.append(elemDict.pipe_radius)
 
   elif elemDict.type == 'DTL':
