@@ -744,9 +744,9 @@ def _str2elem(elemStr):
     elemDict = {'n_map'        : intStr(elemStr[2]),
                 'Kx'           : float(elemStr[4])}
     if float(elemStr[5])==0.0:
-      elemDict.flagEntrance = True
+      elemDict['flagEntrance'] = True
     else:
-      elemDict.flagEntrance = False
+      elemDict['flagEntrance'] = False
   elif data.elem_type[elemID] == 'const_focusing':
     elemDict = { 'length'  : float(elemStr[0]),
                  'n_sckick': intStr(elemStr[1]),
@@ -1470,6 +1470,7 @@ def unNormalizeParticleData(data, ke, mass, freq):
 def readParticleData(fileID, ke, mass, freq, format_id=1,fileLoc=''):
     if isinstance(fileID, str):
       data=np.loadtxt(fileID,skiprows=1)
+      return unNormalizeParticleData(data, ke, mass, freq)
     elif format_id==1:
       data=np.loadtxt(fileLoc+'fort.'+str(fileID))
       return unNormalizeParticleData(data, ke, mass, freq)
@@ -1551,7 +1552,7 @@ def writeParticleData(data, ke, mass, freq, fileLoc='',fname='partcl.data'):
     
 import pandas as __pd
     
-def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0] ):
+def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],order=3):
     """
     M = getTransferMap(lattice,q,mass,ke,freq,
                        epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
@@ -1593,7 +1594,7 @@ def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0] ):
         data[i,8] = i+1
     data[:,6] = beam.multi_charge.q_m[0]
     writeParticleData(data,beam.kinetic_energy, beam.mass, beam.frequency)
-    run()
+    run(order=order)
     
     dataOut = readParticleData(5926, beam.kinetic_energy, beam.mass, beam.frequency, format_id=2)[:,:6]
     #os.system('rm fort.'+str(fileID))
@@ -1637,7 +1638,11 @@ def getInverseLattice(lattice):
   latticeB = clearLattice(latticeB)
   for elemB in latticeB:
     if 'length' in elemB:
-        elemB.length = -elemB.length
+      elemB.length = -elemB.length
+    if elemB.type == 'quad_hardedge':
+      elemB.flagEntrance = not elemB.flagEntrance
+    if elemB.type == 'nonlinear_insert_sliced':
+      elemB.start_position = -(elemB.total_length + elemB.length -elemB.start_position)
     if elemB.type == 'dipole':
       elemB.bending_angle = -elemB.bending_angle
       e1 = elemB.entrance_angle

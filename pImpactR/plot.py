@@ -761,21 +761,24 @@ def phase_space(fileID, ke, mass, freq, zSliced=True, nSlice=1,
 #%% density plot
 try:
     from scipy import stats
-    def density(X,Y, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
+    def density(Xin,Yin, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
+        index_regular = ~(np.isnan(Xin)+np.isnan(Yin))
+        X = Xin[index_regular]
+        Y = Yin[index_regular]
         X=X[0::samplePeriod];Y=Y[0::samplePeriod]
         kernel = stats.gaussian_kde([X,Y])
         cData = kernel.evaluate([X,Y])
         scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
-        if xlim==None:
-            xlim = [min(X),max(X)]
-        pltHandle.xlim(xlim[0],xlim[1])
-        if ylim==None:   
-            ylim = [min(Y),max(Y)]
-        pltHandle.ylim(ylim[0],ylim[1])
-        if xlabel!=None:
-            pltHandle.xlabel(xlabel)
-        if ylabel!=None:
-            pltHandle.ylabel(ylabel)
+#         if xlim==None:
+#             xlim = [min(X),max(X)]
+#         pltHandle.xlim(xlim[0],xlim[1])
+#         if ylim==None:   
+#             ylim = [min(Y),max(Y)]
+#         pltHandle.ylim(ylim[0],ylim[1])
+#         if xlabel!=None:
+#             pltHandle.xlabel(xlabel)
+#         if ylabel!=None:
+#             pltHandle.ylabel(ylabel)
         return scatter
 
     def contour(x,y,levels=0,edge=True, pltHandle=plt):

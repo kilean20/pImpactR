@@ -11,6 +11,7 @@ Modified and Parallelaized by Kilean 2016
 """
 import numpy as np
 from scipy.optimize import OptimizeResult, minimize
+from scipy.optimize import differential_evolution as diff_evol1
 from scipy.optimize.optimize import _status_message
 import numbers
 import multiprocessing

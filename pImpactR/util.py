@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
   from pyNaff import pynaff as naff
 except:
@@ -89,8 +90,9 @@ def dispersion_next(Eta, M, Lbend=0.0, rho=0.0):
         return M*Eta
     else:
         return M*Eta + [[ rho*( 1.0- np.cos(Lbend/rho) ) ],
-                        [ np.sin(Lbend/rho)       ]]
-
+                        [ np.sin(Lbend/rho)       ]]    
+    
+    
 #%%============================================================================
 #                                  achromat                         
 #==============================================================================
@@ -194,7 +196,7 @@ def SC_achromat_condition(lattice):
 #%%============================================================================
 #                         pyNaff - rectangular window only, t=[0,T-1]
 #==============================================================================
-def pyNaff_full(nmode,signal):
+def pyNaff_full(nmode,signal,window_id=1):
     """
     tunes,amps,substracted_signals = pyNaff_full(nmode,signal)
     
@@ -210,15 +212,17 @@ def pyNaff_full(nmode,signal):
         
     pi = np.pi
     T = len(signal)
+    window = (1.0+np.cos(np.pi*(-1.0+2.0/(T+1.0)*np.arange(1,T+1))))**window_id
+    window = window/np.sum(window)
     
-    def loss(tune,signal):
-        T = len(signal)
-        return -np.abs(np.sum(signal*np.exp(-2j*pi*tune*np.arange(T))))
     
     def getPeakInfo(signal):
         T = len(signal)
+        def loss(tune):
+            return -np.abs(np.sum(signal*window*np.exp(-2j*pi*tune*np.arange(T))))
         tune = np.argmax(np.abs(np.fft.fft(signal)))/T
-        result = opt.minimize(loss,tune,args=(signal),method='Nelder-Mead')
+#         result = opt.minimize(loss,tune,args=(signal),method='Nelder-Mead')
+        result = opt.differential_evolution(loss,((tune-2.2/T,tune+2.2/T),),popsize=9)
         return result
     
     
@@ -237,10 +241,156 @@ def pyNaff_full(nmode,signal):
         
         X = X - amps[-1]*np.exp(2j*pi*tunes[-1]*np.arange(T))
         subtracted_signals.append(copy(X))
-        
-    return tunes,amps,subtracted_signals
+    if nmode==1:
+        return tunes[0],amps[0],subtracted_signals[0]
+    else:
+        return tunes,amps,subtracted_signals
 
 
-def pyNaff(nmode,signal):
-    tunes,amps,subtracted_signals = pyNaff_full(nmode,signal)
+def pyNaff(nmode,signal,window_id=1):
+    tunes,amps,subtracted_signals = pyNaff_full(nmode,signal,window_id)
     return tunes,amps
+
+#%%============================================================================
+#                       (Impact lattice) closed orbit search                              
+#==============================================================================
+
+
+def get_tune(beamIn,latticeIn,pData6D_init,direction='x',nturn=1024, order=3):
+    from impactIO import clearLattice
+    from impactIO import writeInputFile
+    from impactIO import writeParticleData
+    from impactIO import run
+    from impactIO import getElem
+    from impactIO import readTBT
+    from copy import deepcopy as copy
+    
+    fID = 8563
+    
+    beam = copy(beamIn)
+    beam.nCore_y=1
+    beam.nCore_z=1
+    beam.n_particles=1
+    beam.distribution.distribution_type = 'ReadFile'
+    
+    lattice = clearLattice(latticeIn)
+    loop = getElem('loop')
+    loop.turns = nturn
+    lattice.insert(0,loop)
+    TBT = getElem('TBT')
+    TBT.file_id = fID
+    TBT.pID_begin = 1
+    TBT.pID_end = 1
+    lattice.insert(1,TBT)
+
+    data = np.zeros([1,9])
+    data[0,:6]= pData6D_init
+    data[0,8] = 1
+    data[0,6] = beam.multi_charge.q_m[0]
+    writeParticleData(data, beam.kinetic_energy, beam.mass, beam.frequency)
+    
+    writeInputFile(beam,lattice)
+    run(order=order)    
+    
+
+    iTBT,TBT = readTBT(fID, beam.kinetic_energy, beam.mass, beam.frequency)
+    if direction=='x':
+        signal = TBT[:,0,0] - 1j*TBT[:,1,0]
+    elif direction=='y':
+        signal = TBT[:,2,0] - 1j*TBT[:,3,0]
+    elif direction=='z':
+        signal = TBT[:,4,0] - 1j*TBT[:,5,0]
+    
+    signal = signal -np.mean(signal)
+    if nturn in [2**i for i in range(5,20)]:
+        tune,amp,dummy = naff(1,signal,window_id=1)
+    else:
+        tune,amp,dummy = pyNaff(1,signal)
+
+    return tune[0], amp[0]
+    
+    
+    
+    
+def get_closed_orbit(beamIn,latticeIn,pData4D_init,delta,delta0=0):
+    from impactIO import clearLattice
+    from impactIO import writeInputFile
+    from impactIO import getElem
+    from copy import deepcopy as copy
+    try:
+        import scipy.optimize as opt
+    except:
+        print('util.get_closed_orbit is not available')
+    
+    
+    fID = 5926    
+    beam = copy(beamIn)
+    beam.nCore_y=1
+    beam.nCore_z=1
+    beam.n_particles=1
+    beam.distribution.distribution_type = 'ReadFile'
+    gam0 = beam.kinetic_energy/beam.mass+1.0
+    bet0 = np.sqrt((gam0+1.0)*(gam0-1.0))/gam0
+    bg0  = gam0*bet0
+    
+    lattice = clearLattice(latticeIn)
+    loop = getElem('loop')
+    loop.turns = 1
+    lattice.insert(0,loop)
+    elemWrite = getElem('write_raw_ptcl')
+    elemWrite.file_id = fID
+    elemWrite.format_id = 2
+    lattice.append(elemWrite)
+    
+    writeInputFile(beam,lattice)
+    
+    
+    def _cost_closed_orbit(pData4D_init,args):
+        from impactIO import writeParticleData
+        from impactIO import readParticleData
+        from impactIO import run
+       
+        fID = args[0]
+        beam = args[1]
+        delta=args[2]
+            
+        if len(args)>3:
+            order=args[3]
+        else:
+            order=3
+
+        data = np.zeros([1,9])
+        data[0,:4]= pData4D_init
+        data[0,5] = delta*(gam0+1)/gam0*beam.kinetic_energy
+        data[0,8] = 1
+        data[0,6] = beam.multi_charge.q_m[0]
+
+
+        writeParticleData(data, beam.kinetic_energy, beam.mass, beam.frequency)
+        run(order=order)
+        dataOut = readParticleData(fID, beam.kinetic_energy, beam.mass, beam.frequency, format_id=2)
+
+        diff = pData4D_init - dataOut[0,:4]
+        return np.sum(diff*diff)
+    
+    result = opt.minimize(_cost_closed_orbit,pData4D_init,args=([fID,beam,delta]),method='Nelder-Mead',tol=1.0e-5)
+    if result.message=='Optimization terminated successfully.':
+        return result.x, result.fun
+    else:
+        diff = delta-delta0
+        result.x = pData4D_init
+        print('pData4D_init failed to get closed orbit. Trying from other initial conditions...')
+        for i in range(1,6):
+            tmp = delta0 + diff*0.2*i
+            pData4D_init = result.x
+            result = opt.minimize(_cost_closed_orbit,result.x,args=([fID,beam,tmp]),method='Nelder-Mead')
+            if result.message != 'Optimization terminated successfully.':
+                result.x = pData4D_init
+                print('pData4D_init failed to get closed orbit again. Trying from other initial conditions...')
+                for j in range(1,6):
+                    tmp = pData4D_init0 + diff *(0.2*(i-1) + 0.02*j)
+                    result = opt.minimize(_cost_closed_orbit,result.x,args=([fID,beam,tmp]),method='Nelder-Mead')
+                    if result.message != 'Optimization terminated successfully.':
+                        print('get closed orbit failed!!!')
+                        return 1
+        return result

@@ -6,24 +6,29 @@ import MLI_getElem as getElem
 from copy import deepcopy as copy
 import re
 
+
 def run(nCore=None):
   if nCore==None:
     os.system('time mli.x > mli.log')
   else:
     os.system('time mpirun -n '+str(nCore)+' mli.x > mli.log')
 
+    
 def elem2str(elemList):
   f = '\n'
-  for item in elemList:
-    if isinstance(item, str):
-      f = f+ item + ' \n'
-    else:
-      try:
-        f = f+item.str() + ' \n'
-      except TypeError:
-        print('following is not MLI command')
-        print(item)
-  return f
+  try:
+    f = f+elemList.str()
+  except:
+    for item in elemList:
+      if isinstance(item, str):
+        f = f+ item + ' \n'
+      else:
+        try:
+          f = f+item.str() + ' \n'
+        except TypeError:
+          print('following is not MLI command')
+          print(item)
+  return f 
 
   
 class buildMenu(dictClass):
@@ -183,7 +188,19 @@ def _str2val(s,variables):
   elif _isvariable(s,variables):
     return variables[s]
   else:
-    return s
+    for var in sorted(variables, key=len, reverse=True):
+        s=s.replace(var,str(variables[var]))
+    try:
+      s=s.replace('D','E').replace('d','e')
+      pi = np.pi
+      tan = np.tan
+      sin = np.sin
+      cos = np.cos
+      exp = np.exp
+      return eval(s)
+    except:
+      return s
+    
   
 def _file2rawlines(fname):
   lines = []
@@ -192,13 +209,15 @@ def _file2rawlines(fname):
   with open(fname) as f:
     flagLine = False
     for line in f:
-      line=line.replace('\n','')
-      if line.lstrip().find('!')==0 or line.lstrip()=='' or line.lstrip()[:3]=='>>>':
+      line=line.replace('\n','').lower()
+      line=line.lstrip()
+      if line.find('!')==0 or line=='' or line[:3]=='>>>':
         continue
       i = line.find('!')
       if i!=-1:
         line = line[:i]  
       if 'line' in line and '(' in line:
+        line=line.replace(':',',')
         flagLine = True
       if flagLine:
         line=line.replace('&','')
@@ -246,8 +265,8 @@ def _rawlines2elem(raw,variables):
         iend  = line.find('}')
         line = re.split(':|,|=',line[:istart]) + [line[istart:iend+1]] + re.split(':|,|=',line[iend+1:])
         line = list(filter(('').__ne__, line))
-      name = line[0]
-      elem  = line[1]
+      name = line[0].replace(' ','')
+      elem  = line[1].replace(' ','')
       if elem   == 'beam':
         f = getElem.beam(name=name)
       elif elem == 'units':
@@ -302,6 +321,8 @@ def _rawlines2elem(raw,variables):
         f = getElem.dipedge(name=name)
       elif elem == 'srfc':
         f = getElem.srfc(name=name)
+      elif elem == 'line':
+        continue
       else:
         print(elem + ' is not recognized. skipping...')
         continue
@@ -336,7 +357,6 @@ def _rawlines2lattice(raw,elems):
     for elem in elems:
       if elem.name == raw2[i]:
         raw2[i]=elem
-
   nlattices = len(ilattices)
   lattices = [0]*nlattices
   i=-1
@@ -344,12 +364,39 @@ def _rawlines2lattice(raw,elems):
     lattices[i]=getElem.line(name=raw2[ilattices[i]-1],elemList=raw2[ilattices[i]+1:ilattices[i+1]-1])
   lattices[i+1]=getElem.line(name=raw2[ilattices[i+1]-1],elemList=raw2[ilattices[i+1]+1:])
   return lattices
+
+
+def _unroll_nested_lines(latticeList,elemList):
+    for a,lat_a in enumerate(latticeList):
+      line = lat_a.list
+      i=0
+      while(True):
+        flag = True
+        iStar = line[i].find('*')
+        if iStar>0:
+          tmp = [line[i][iStar+1:]]*int(line[i][:iStar])
+          line = line[:i] + copy(tmp) +line[i+1:]
+          lat_a.list = line
+        for lat_b in latticeList[:a]:
+          if line[i] == lat_b.name:
+            flag = False
+            line = line[:i] +copy(lat_b.list) +line[i+1:]
+            lat_a.list = line
+            i = i + len(lat_b.list)
+            if i==len(line):
+              break
+        if flag:
+          i=i+1
+        if i==len(line):
+          break
+    
     
 
 def _rawlines_to_elemList_n_latticeList(rawlines):
   var,raw2=_rawlines2var(rawlines)
   elemList,raw2=_rawlines2elem(raw2,var)
   latticeList  =_rawlines2lattice(raw2,elemList)
+  _unroll_nested_lines(latticeList,elemList)
   return elemList,latticeList
 
 
