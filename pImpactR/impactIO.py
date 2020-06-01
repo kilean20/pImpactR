@@ -96,7 +96,7 @@ def run(beam=None,nCore=None,execfile=None,order=None):
       else:
         execfile = 'xmain1'
         if order==None:
-          print('IMPACTz: linear dipoel finge model and linear drift propagator is assumed...')
+          print('IMPACTz: nonlinear order is not sepcified. linear order of dipoel fringe-field model, linear dipole geometric effect and drift propagator is assumed...')
     if beam == None and nCore==None:
         return os.system(execfile+' > log.impact_std')
     elif isinstance(nCore,numbers.Integral) :

@@ -2,6 +2,7 @@ from __future__ import division, print_function, absolute_import
 import string
 import random
 import os
+import shutil 
 
 """
 [Copyright - the Scipy community] original version by Andrew Nelson 2014
@@ -17,8 +18,7 @@ import numbers
 import multiprocessing
 import time
 
-
-# from differential_evolution import differential_evolution
+# __all__ = ['differential_evolution']
 
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
     """
@@ -30,11 +30,33 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
     """
     return ''.join(random.choice(chars) for _ in range(size))
 
-  
-  
+
+def prepare_parallel_objFuncIO_source_of_inputFiles(fnames=[],dst='origin'):
+    try:
+        os.mkdir(dst)
+    except OSError:
+        print ("Creation of the directory origin failed")
+    if isinstance(fnames,list):
+        for fname in fnames:
+            shutil.copyfile(fname, dst+'/')
+    else:
+        raise ValueError('fnames must be a list of file names required to run the objective function')
 
 
-__all__ = ['differential_evolution']
+def construct_temporaryWorkingDirectory(dst='origin'):
+    target = id_generator()  # generage random directory name
+    while os.path.exists(target):  
+        target = pm.opt.id_generator()
+    shutil.copytree(dst, target)
+    os.chdir(target)
+    return target
+    
+    
+def destrcut_temporaryWorkingDirectory(target):
+    os.chdir('..')
+    shutil.rmtree(target)
+    
+    
 
 _MACHEPS = np.finfo(np.float64).eps
 
