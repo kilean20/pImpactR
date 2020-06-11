@@ -33,7 +33,8 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 
 def prepare_parallel_objFuncIO_source_of_inputFiles(fnames=[],dst='origin'):
     try:
-        os.mkdir(dst)
+        if not os.path.exists(dst):
+            os.mkdir(dst)
     except OSError:
         print ("Creation of the directory origin failed")
     if isinstance(fnames,list):
