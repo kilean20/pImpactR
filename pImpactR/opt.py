@@ -782,7 +782,7 @@ class DifferentialEvolutionSolver(object):
                 if time.time()-self.start_time > self.maxtime:
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
-                    break
+
 
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
