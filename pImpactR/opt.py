@@ -493,8 +493,8 @@ class DifferentialEvolutionSolver(object):
                  strategy='best1bin', maxiter=1000, maxtime=None, popsize=15,
                  tol=0.01, mutation=(0.5, 1), recombination=0.7, seed=None,
                  maxfun=np.inf, callback=None, disp=False, polish=True,
-                 init='latinhypercube', atol=0, updating='immediate',
-                 workers=1, constraints=(), prev_result=None):
+                 init='latinhypercube', prev_result=None, atol=0, updating='immediate',
+                 workers=1, constraints=()):
 
         if strategy in self._binomial:
             self.mutation_func = getattr(self, self._binomial[strategy])
