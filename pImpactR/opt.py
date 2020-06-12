@@ -801,6 +801,7 @@ class DifferentialEvolutionSolver(object):
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
             # evolve the population by a generation
+            print('nit',nit)
             print('self.num_population_members=',self.num_population_members)
             try:
                 next(self)
@@ -1085,6 +1086,7 @@ class DifferentialEvolutionSolver(object):
         """
         # the population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies
+        print('1 self.num_population_members=',self.num_population_members)
         if np.all(np.isinf(self.population_energies)):
             self.feasible, self.constraint_violation = (
                 self._calculate_population_feasibilities(self.population))
@@ -1096,6 +1098,8 @@ class DifferentialEvolutionSolver(object):
                     self.population[self.feasible]))
 
             self._promote_lowest_energy()
+            
+        print('2 self.num_population_members=',self.num_population_members)
 
         if self.dither is not None:
             self.scale = (self.random_number_generator.rand()
@@ -1171,6 +1175,8 @@ class DifferentialEvolutionSolver(object):
             # only calculate for feasible entries
             trial_energies[feasible] = self._calculate_population_energies(
                 trial_pop[feasible])
+            
+            print('3 self.num_population_members=',self.num_population_members)
 
             # which solutions are 'improved'?
             loc = [self._accept_trial(*val) for val in
