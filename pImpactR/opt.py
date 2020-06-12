@@ -74,7 +74,7 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
                            callback=None, disp=False, polish=True,
                            init='latinhypercube', atol=0, updating='immediate',
                            workers=1, constraints=(),
-                           prev_result=OptimizeResult() ):
+                           prev_result=None ):
     """Finds the global minimum of a multivariate function.
     Differential Evolution is stochastic in nature (does not use gradient
     methods) to find the minimum, and can search large areas of candidate
@@ -321,6 +321,7 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
     with DifferentialEvolutionSolver(func, bounds, args=args,
                                      strategy=strategy,
                                      maxiter=maxiter,
+                                     maxtime=maxtime,
                                      popsize=popsize, tol=tol,
                                      mutation=mutation,
                                      recombination=recombination,
@@ -329,7 +330,9 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
                                      disp=disp, init=init, atol=atol,
                                      updating=updating,
                                      workers=workers,
-                                     constraints=constraints) as solver:
+                                     constraints=constraints,
+                                     prev_result=None
+                                    ) as solver:
         ret = solver.solve()
 
     return ret
@@ -487,11 +490,11 @@ class DifferentialEvolutionSolver(object):
                         "(M, N) where N is the number of parameters and M>5")
 
     def __init__(self, func, bounds, args=(),
-                 strategy='best1bin', maxiter=1000, popsize=15,
+                 strategy='best1bin', maxiter=1000, maxtime=None, popsize=15,
                  tol=0.01, mutation=(0.5, 1), recombination=0.7, seed=None,
                  maxfun=np.inf, callback=None, disp=False, polish=True,
                  init='latinhypercube', atol=0, updating='immediate',
-                 workers=1, constraints=()):
+                 workers=1, constraints=(), prev_result=None):
 
         if strategy in self._binomial:
             self.mutation_func = getattr(self, self._binomial[strategy])
