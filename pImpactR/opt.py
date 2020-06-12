@@ -780,6 +780,7 @@ class DifferentialEvolutionSolver(object):
         # Although this is also done in the evolve generator it's possible
         # that someone can set maxiter=0, at which point we still want the
         # initial energies to be calculated (the following loop isn't run).
+        print('within solve')
         if np.all(np.isinf(self.population_energies)):
             self.feasible, self.constraint_violation = (
                 self._calculate_population_feasibilities(self.population))
@@ -796,10 +797,11 @@ class DifferentialEvolutionSolver(object):
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
                     
-
+        print('start optim)
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
             # evolve the population by a generation
+            print('self.num_population_members=',self.num_population_members)
             try:
                 next(self)
             except StopIteration:
