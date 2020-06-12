@@ -805,6 +805,7 @@ class DifferentialEvolutionSolver(object):
             print('self.num_population_members=',self.num_population_members)
             try:
                 next(self)
+                print('next done')
             except StopIteration:
                 warning_flag = True
                 if self._nfev > self.maxfun:
@@ -1199,6 +1200,8 @@ class DifferentialEvolutionSolver(object):
             # make sure the best solution is updated if updating='deferred'.
             # put the lowest energy into the best solution position.
             self._promote_lowest_energy()
+            
+            print('4 self.num_population_members=',self.num_population_members)
 
         return self.x, self.population_energies[0]
 
