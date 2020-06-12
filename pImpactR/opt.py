@@ -761,7 +761,7 @@ class DifferentialEvolutionSolver(object):
         nit, warning_flag = 0, False
         status_message = _status_message['success']
         
-        print('popsize=',np.size(population, 0))
+        print('popsize=',np.size(self.population, 0))
 
         # The population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies.
