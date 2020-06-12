@@ -64,10 +64,10 @@ _MACHEPS = np.finfo(np.float64).eps
 
 def differential_evolution(func, bounds, strategy='rand1bin', 
                            prev_result=OptimizeResult(), best_arg=None,
-                           maxiter=None, popsize=15, tol=0.01,
+                           maxiter=None, popsize=15, tol=0.01, 
                            mutation=(0.5, 1), recombination=0.9, seed=None,
                            callback=None, disp=False, polish=True, ncore=1,
-                           init='random',maxtime=60*30):
+                           init='random', maxtime=60*30, re_eval = False):
     """
     result = differential_evolution(func, bounds, strategy='rand1bin', 
                            prev_result=OptimizeResult(), best_arg=None,
@@ -162,6 +162,8 @@ def differential_evolution(func, bounds, strategy='rand1bin',
         maximize coverage of the available parameter space. 'random' initializes
         the population randomly - this has the drawback that clustering can
         occur, preventing the whole of parameter space being covered.
+    re_eval : bool, optional
+        If true, evaluate populatation energies again when prev_result is not empty
     Returns
     -------
     res : OptimizeResult
@@ -306,7 +308,7 @@ class DifferentialEvolutionSolver(object):
                              ' in x')
 
         self.maxiter = maxiter or 1000
-        self.niter = 0
+        self.niter = 1
         self.maxtime = maxtime
         self.time=time.time()
 
@@ -326,8 +328,20 @@ class DifferentialEvolutionSolver(object):
         #are other population initializations possible.
         if  hasattr(prev_result,'population') :
             self.population = prev_result.population
+            if hasattr(prev_result,'population_energies'):
+                self.population_energies = prev_result.population_energies
+            else :
+#                 self.niter = 1
+                Parameters=[]
+                for index, candidate in enumerate(self.population):
+                    Parameters.append (self._scale_parameters(candidate) )
+
+                pool=multiprocessing.Pool(self.ncore)
+                self.population_energies = pool.map(self.func, Parameters ) 
+                pool.close()
+                pool.join()
         else :
-            self.niter = 1
+#             self.niter = 1
             self.population = np.zeros((popsize,
                                         parameter_count))
             if init == 'latinhypercube':
@@ -339,19 +353,6 @@ class DifferentialEvolutionSolver(object):
                                  "of 'latinhypercube' or 'random'")
             if best_arg is not None:
                 self.population[-1] = 0.5 + (np.array(best_arg)-self.__scale_arg1)/self.__scale_arg2                            
-                
-        if hasattr(prev_result,'population') and hasattr(prev_result,'population_energies'):
-            self.population_energies = prev_result.population_energies
-        else :
-            self.niter = 1
-            Parameters=[]
-            for index, candidate in enumerate(self.population):
-                Parameters.append (self._scale_parameters(candidate) )
-                
-            pool=multiprocessing.Pool(self.ncore)
-            self.population_energies = pool.map(self.func, Parameters ) 
-            pool.close()
-            pool.join()
         
         iNan = []
         for i in range(len(self.population_energies)):
@@ -454,7 +455,7 @@ class DifferentialEvolutionSolver(object):
         #print(self.population_energies[0])
 
         # do the optimisation.
-        for nit in range(self.niter, self.maxiter + 1):
+        for nit in range(self.niter, self.maxiter+1):
             population_count = np.size(self.population, 0)
             if self.dither is not None:
                 self.scale = self.random_number_generator.rand(
@@ -518,7 +519,7 @@ class DifferentialEvolutionSolver(object):
                 result = OptimizeResult(
                          population = self.population,
                          population_energies = self.population_energies,
-                         nit = self.niter, 
+                         nit = nit, 
                          message = 'Maximum time has been exceeded.',
                          success = False )
                 return result
