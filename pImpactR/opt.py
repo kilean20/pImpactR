@@ -69,7 +69,7 @@ _MACHEPS = np.finfo(np.float64).eps
 
 
 def differential_evolution(func, bounds, args=(), strategy='best1bin',
-                           maxiter=1000, mintime=None, popsize=15, tol=0.02,
+                           maxiter=1000, maxtime=None, popsize=15, tol=0.02,
                            mutation=(0.5, 1), recombination=0.7, seed=None,
                            callback=None, disp=False, polish=True,
                            init='latinhypercube', atol=0, updating='immediate',
