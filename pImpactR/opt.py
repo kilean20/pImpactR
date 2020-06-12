@@ -588,7 +588,8 @@ class DifferentialEvolutionSolver(object):
         # there are other population initializations possible.
         # the minimum is 5 because 'best2bin' requires a population that's at
         # least 5 long
-        self.num_population_members = max(5, popsize * self.parameter_count)
+        self.num_population_members = popsize
+        # self.num_population_members = max(5, popsize * self.parameter_count)
 
         self.population_shape = (self.num_population_members,
                                  self.parameter_count)
