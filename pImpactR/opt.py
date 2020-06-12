@@ -595,18 +595,21 @@ class DifferentialEvolutionSolver(object):
                                  self.parameter_count)
 
         self._nfev = 0
-        if isinstance(init, string_types):
-            if init == 'latinhypercube':
-                self.init_population_lhs()
-            elif init == 'random':
-                self.init_population_random()
+    
+        if prev_result is None:
+            if isinstance(init, string_types):
+                if init == 'latinhypercube':
+                    self.init_population_lhs()
+                elif init == 'random':
+                    self.init_population_random()
+                else:
+                    raise ValueError(self.__init_error_msg)
             else:
-                raise ValueError(self.__init_error_msg)
+                self.init_population_array(init)
         else:
-            self.init_population_array(init)
-            
-        if prev_result is not None:
+            print('prev_result=',prev_result)
             self.init_population_array(prev_result.population)
+            self.num_population_members = len(self.population)
             if hasattr(prev_result,'population_energies'):
                 self.population_energies = prev_result.population_energies
 
@@ -632,11 +635,10 @@ class DifferentialEvolutionSolver(object):
 
         self.disp = disp
         
+        print('self.population',self.population)
+        print('self.population_energies',self.population_energies)
         
-        print('## init done')
-        print('self.population=',self.population)
-        print('self.population_energies=',self.population_energies)
-
+        
     def init_population_lhs(self):
         """
         Initializes the population with Latin Hypercube Sampling.
@@ -767,8 +769,6 @@ class DifferentialEvolutionSolver(object):
         nit, warning_flag = 0, False
         status_message = _status_message['success']
         
-        print('popsize=',np.size(self.population, 0))
-
         # The population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies.
         # Although this is also done in the evolve generator it's possible
@@ -786,16 +786,13 @@ class DifferentialEvolutionSolver(object):
             self._promote_lowest_energy()
             
             if self.maxtime is not None:
-                print('###self.maxtime is not None',time.time()-self.start_time, self.maxtime)
                 if time.time()-self.start_time > self.maxtime:
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
                     
 
-
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
-            print('###nit',nit)
             # evolve the population by a generation
             try:
                 next(self)
@@ -809,7 +806,6 @@ class DifferentialEvolutionSolver(object):
                 break
                 
             if self.maxtime is not None:
-                print('###self.maxtime is not None',time.time()-self.start_time, self.maxtime)
                 if time.time()-self.start_time > self.maxtime:
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
@@ -853,7 +849,10 @@ class DifferentialEvolutionSolver(object):
             nfev=self._nfev,
             nit=nit,
             message=status_message,
-            success=(warning_flag is not True))
+            success=(warning_flag is not True),
+            population = self.population,
+            population_energies = self.population_energies
+        )
 
         if self.polish:
             polish_method = 'L-BFGS-B'
