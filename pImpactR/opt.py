@@ -807,6 +807,7 @@ class DifferentialEvolutionSolver(object):
                 next(self)
                 print('next done')
             except StopIteration:
+                print('StopIteration')
                 warning_flag = True
                 if self._nfev > self.maxfun:
                     status_message = _status_message['maxfev']
@@ -864,7 +865,7 @@ class DifferentialEvolutionSolver(object):
             population_energies = self.population_energies
         )
 
-        if self.polish:
+        if self.polish and not warning_flag:
             polish_method = 'L-BFGS-B'
 
             if self._wrapped_constraints:
