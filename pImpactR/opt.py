@@ -74,7 +74,7 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
                            callback=None, disp=False, polish=True,
                            init='latinhypercube', atol=0, updating='immediate',
                            workers=1, constraints=(),
-                           prev_result=None ):
+                           prev_result = OptimizeResult() ):
     """Finds the global minimum of a multivariate function.
     Differential Evolution is stochastic in nature (does not use gradient
     methods) to find the minimum, and can search large areas of candidate
@@ -331,7 +331,7 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
                                      updating=updating,
                                      workers=workers,
                                      constraints=constraints,
-                                     prev_result=None
+                                     prev_result=OptimizeResult()
                                     ) as solver:
         ret = solver.solve()
 
@@ -493,7 +493,7 @@ class DifferentialEvolutionSolver(object):
                  strategy='best1bin', maxiter=1000, maxtime=None, popsize=15,
                  tol=0.01, mutation=(0.5, 1), recombination=0.7, seed=None,
                  maxfun=np.inf, callback=None, disp=False, polish=True,
-                 init='latinhypercube', prev_result=None, atol=0, updating='immediate',
+                 init='latinhypercube', prev_result=OptimizeResult(), atol=0, updating='immediate',
                  workers=1, constraints=()):
 
         if strategy in self._binomial:
@@ -600,7 +600,14 @@ class DifferentialEvolutionSolver(object):
         print('### prev_result ###')
         print(prev_result)
     
-        if prev_result is None:
+    
+        if  hasattr(prev_result,'population') :
+            print('## prev_result=',prev_result)
+            self.init_population_array(prev_result.population)
+            self.num_population_members = len(self.population)
+            if hasattr(prev_result,'population_energies'):
+                self.population_energies = prev_result.population_energies
+        else:
             if isinstance(init, string_types):
                 if init == 'latinhypercube':
                     self.init_population_lhs()
@@ -610,12 +617,7 @@ class DifferentialEvolutionSolver(object):
                     raise ValueError(self.__init_error_msg)
             else:
                 self.init_population_array(init)
-        else:
-            print('## prev_result=',prev_result)
-            self.init_population_array(prev_result.population)
-            self.num_population_members = len(self.population)
-            if hasattr(prev_result,'population_energies'):
-                self.population_energies = prev_result.population_energies
+
 
 
         # infrastructure for constraints
