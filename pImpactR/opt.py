@@ -603,7 +603,7 @@ class DifferentialEvolutionSolver(object):
     
         if  hasattr(prev_result,'population') :
             print('## prev_result=',prev_result)
-            self.init_population_array(prev_result.population)
+            self.init_population_array(self._scale_parameters(prev_result.population))
             self.num_population_members = len(self.population)
             if hasattr(prev_result,'population_energies'):
                 self.population_energies = prev_result.population_energies
