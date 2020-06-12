@@ -331,7 +331,7 @@ def differential_evolution(func, bounds, args=(), strategy='best1bin',
                                      updating=updating,
                                      workers=workers,
                                      constraints=constraints,
-                                     prev_result=OptimizeResult()
+                                     prev_result=prev_result
                                     ) as solver:
         ret = solver.solve()
 
