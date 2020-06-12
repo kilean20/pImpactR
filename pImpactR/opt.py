@@ -595,6 +595,10 @@ class DifferentialEvolutionSolver(object):
                                  self.parameter_count)
 
         self._nfev = 0
+        
+        
+        print('### prev_result ###')
+        print(prev_result)
     
         if prev_result is None:
             if isinstance(init, string_types):
@@ -607,7 +611,7 @@ class DifferentialEvolutionSolver(object):
             else:
                 self.init_population_array(init)
         else:
-            print('prev_result=',prev_result)
+            print('## prev_result=',prev_result)
             self.init_population_array(prev_result.population)
             self.num_population_members = len(self.population)
             if hasattr(prev_result,'population_energies'):
