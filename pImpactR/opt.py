@@ -1,4 +1,4 @@
-from __future__ import division, print_function, absolute_import
+from __future__ import division, absolute_import
 import warnings
 import string
 import random
@@ -630,6 +630,11 @@ class DifferentialEvolutionSolver(object):
         self.feasible = np.ones(self.num_population_members, bool)
 
         self.disp = disp
+        
+        
+        print('## init done')
+        print('self.population=',self.population)
+        print('self.population_energies=',self.population_energies)
 
     def init_population_lhs(self):
         """
