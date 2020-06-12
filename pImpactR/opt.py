@@ -797,7 +797,7 @@ class DifferentialEvolutionSolver(object):
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
                     
-        print('start optim)
+        print('start optim')
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
             # evolve the population by a generation
