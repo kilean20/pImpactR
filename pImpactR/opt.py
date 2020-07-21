@@ -597,12 +597,11 @@ class DifferentialEvolutionSolver(object):
         self._nfev = 0
         
         
-        print('### prev_result ###')
-        print(prev_result)
+#         print('### prev_result ###')
+#         print(prev_result)
     
     
         if  hasattr(prev_result,'population') :
-            print('## prev_result=',prev_result)
             self.init_population_array(self._scale_parameters(prev_result.population))
             self.num_population_members = len(self.population)
             if hasattr(prev_result,'population_energies'):
@@ -641,8 +640,8 @@ class DifferentialEvolutionSolver(object):
 
         self.disp = disp
         
-        print('self.population',self.population)
-        print('self.population_energies',self.population_energies)
+#         print('self.population',self.population)
+#         print('self.population_energies',self.population_energies)
         
         
     def init_population_lhs(self):
@@ -780,7 +779,7 @@ class DifferentialEvolutionSolver(object):
         # Although this is also done in the evolve generator it's possible
         # that someone can set maxiter=0, at which point we still want the
         # initial energies to be calculated (the following loop isn't run).
-        print('within solve')
+#         print('within solve')
         if np.all(np.isinf(self.population_energies)):
             self.feasible, self.constraint_violation = (
                 self._calculate_population_feasibilities(self.population))
@@ -797,17 +796,17 @@ class DifferentialEvolutionSolver(object):
                     warning_flag = True
                     status_message = ('Maximum time is exceeded')
                     
-        print('start optim')
+#         print('start optim')
         # do the optimisation.
         for nit in xrange(1, self.maxiter + 1):
             # evolve the population by a generation
-            print('nit',nit)
-            print('self.num_population_members=',self.num_population_members)
+#             print('nit',nit)
+#             print('self.num_population_members=',self.num_population_members)
             try:
                 next(self)
-                print('next done')
+#                 print('next done')
             except StopIteration:
-                print('StopIteration')
+#                 print('StopIteration')
                 warning_flag = True
                 if self._nfev > self.maxfun:
                     status_message = _status_message['maxfev']
@@ -1088,7 +1087,7 @@ class DifferentialEvolutionSolver(object):
         """
         # the population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies
-        print('1 self.num_population_members=',self.num_population_members)
+#         print('1 self.num_population_members=',self.num_population_members)
         if np.all(np.isinf(self.population_energies)):
             self.feasible, self.constraint_violation = (
                 self._calculate_population_feasibilities(self.population))
@@ -1101,7 +1100,7 @@ class DifferentialEvolutionSolver(object):
 
             self._promote_lowest_energy()
             
-        print('2 self.num_population_members=',self.num_population_members)
+#         print('2 self.num_population_members=',self.num_population_members)
 
         if self.dither is not None:
             self.scale = (self.random_number_generator.rand()
@@ -1178,7 +1177,7 @@ class DifferentialEvolutionSolver(object):
             trial_energies[feasible] = self._calculate_population_energies(
                 trial_pop[feasible])
             
-            print('3 self.num_population_members=',self.num_population_members)
+#             print('3 self.num_population_members=',self.num_population_members)
 
             # which solutions are 'improved'?
             loc = [self._accept_trial(*val) for val in
@@ -1202,7 +1201,7 @@ class DifferentialEvolutionSolver(object):
             # put the lowest energy into the best solution position.
             self._promote_lowest_energy()
             
-            print('4 self.num_population_members=',self.num_population_members)
+#             print('4 self.num_population_members=',self.num_population_members)
 
         return self.x, self.population_energies[0]
 

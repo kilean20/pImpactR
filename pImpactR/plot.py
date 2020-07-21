@@ -765,8 +765,8 @@ try:
         index_regular = ~(np.isnan(Xin)+np.isnan(Yin))
         X = Xin[index_regular]
         Y = Yin[index_regular]
-        X=X[0::samplePeriod];Y=Y[0::samplePeriod]
-        kernel = stats.gaussian_kde([X,Y])
+        Xk=X[0::samplePeriod];Yk=Y[0::samplePeriod]
+        kernel = stats.gaussian_kde([Xk,Yk])
         cData = kernel.evaluate([X,Y])
         scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
 #         if xlim==None:
