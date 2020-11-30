@@ -770,7 +770,8 @@ try:
         kernel = stats.gaussian_kde([Xk,Yk])
         cData = kernel.evaluate([X,Y])
         if 'vmin' in color_norm and 'vmin' in color_norm:
-            scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0, norm  = mplt.colors.Normalize(vmin=0, vmax=0.07)) 
+            scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0, 
+                                        norm  = mplt.colors.Normalize( vmin=color_norm['vmin'], vmax=color_norm['vmax'] )) 
         else:
             scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
         if cbar:
