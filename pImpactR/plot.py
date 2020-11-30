@@ -761,7 +761,7 @@ def phase_space(fileID, ke, mass, freq, zSliced=True, nSlice=1,
 #%% density plot
 try:
     from scipy import stats
-    def density(Xin,Yin, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt):
+    def density(Xin,Yin, samplePeriod=1, xlim=None, ylim=None, xlabel=None, ylabel=None, mksize=4, pltHandle=plt,cbar=False):
         index_regular = ~(np.isnan(Xin)+np.isnan(Yin))
         X = Xin[index_regular]
         Y = Yin[index_regular]
@@ -769,7 +769,8 @@ try:
         kernel = stats.gaussian_kde([Xk,Yk])
         cData = kernel.evaluate([X,Y])
         scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
-        pltHandle.colorbar(scatter)
+        if cbar:
+            pltHandle.colorbar(scatter)
 #         if xlim==None:
 #             xlim = [min(X),max(X)]
 #         pltHandle.xlim(xlim[0],xlim[1])
