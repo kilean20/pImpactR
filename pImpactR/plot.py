@@ -769,6 +769,7 @@ try:
         kernel = stats.gaussian_kde([Xk,Yk])
         cData = kernel.evaluate([X,Y])
         scatter = pltHandle.scatter(X,Y, c=cData, s=mksize, lw = 0)
+        pltHandle.colorbar(scatter)
 #         if xlim==None:
 #             xlim = [min(X),max(X)]
 #         pltHandle.xlim(xlim[0],xlim[1])
