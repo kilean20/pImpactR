@@ -522,13 +522,16 @@ class sbend(elemClass):
     hgap
     fint = fringe field integration parameter
   """
-  def __init__(self,name='sbend',l=0.1,angle=0,hgap=0,fint=0):
+  def __init__(self,name='sbend',l=0.1,angle=0,hgap=0,fint=0,e1=0,e2=0):
     self.elem  = 'sbend'
     self.name = name
     self.l = l
     self.angle = angle
     self.hgap = hgap
     self.fint = fint
+    self.e1 = e1
+    self.e2 = e2
+    
       
       
 class dipedge(elemClass):

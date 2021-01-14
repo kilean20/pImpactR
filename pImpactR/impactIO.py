@@ -1550,68 +1550,13 @@ def writeParticleData(data, ke, mass, freq, fileLoc='',fname='partcl.data'):
     np.savetxt(fname,tmpdata,header=str(len(data))+' 0. 0.',comments='')
 
     
-import pandas as __pd
-    
-def getTransferMap(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],order=3):
-    """
-    M = getTransferMap(lattice,q,mass,ke,freq,
-                       epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
-                       fname='test.in' )
-    get linear transfer map (without space-charge)  by tracking 6 particles
-    whose initial phase-space perturbation given by epsilon
-    input
-        beamIn  = impact beam class
-        lattice = (dict) lattice dictionary whose transvermap to be determined
-        epsilon = 6 dimension array of perturbation for 
-                  x,px,y,py, z*360/v/freq, E  in unit of 
-                  [m],[rad],[m],[rad],[deg],[MeV]
-                  default : epsilon = [1e-e-8,1e-6,1e-8,1e-6,1e-7,1.0]
-    """
-    beam = copy(beamIn)
-    beam.nCore_y=1
-    beam.nCore_z=1
-    beam.n_particles=6
-    beam.distribution.distribution_type = 'ReadFile'
-    gam0 = beam.kinetic_energy/beam.mass+1.0
-    bet0 = np.sqrt((gam0+1.0)*(gam0-1.0))/gam0
-    bg0  = gam0*bet0
-    
-    line = lattice.copy()
-    line = [item for item in line if not item.type == 'write_raw_ptcl']    
-    line = [item for item in line if not item.type == 'loop']   
-    loop = getElem('loop')
-    loop.turns = 1
-    line.insert(0,loop)
-    elemWrite = getElem('write_raw_ptcl')
-    elemWrite.file_id = 5926
-    elemWrite.format_id = 2
-    line.append(elemWrite)
-    writeInputFile(beam,line)
-    
-    data = np.zeros([6,9])
-    for i in range(6):
-        data[i,i] = epsilon[i]
-        data[i,8] = i+1
-    data[:,6] = beam.multi_charge.q_m[0]
-    writeParticleData(data,beam.kinetic_energy, beam.mass, beam.frequency)
-    run(order=order)
-    
-    dataOut = readParticleData(5926, beam.kinetic_energy, beam.mass, beam.frequency, format_id=2)[:,:6]
-    #os.system('rm fort.'+str(fileID))
-    m,n = dataOut.shape
-    M = np.zeros([6,6])
-    if m<6:
-        print('particle lost observed. too large inital perturbation')
-    else:
-        for i in range(6):
-            M[:,i] = dataOut[i,:]/epsilon[i]
-    return __pd.DataFrame(M)
   
 def clearLattice(lattice):
-  return [item for item in lattice 
+      return [item for item in lattice 
           if item.type not in ['write_raw_ptcl','save4restart','-8',
                                'loop','pipeinfo','TBT_integral_onMomentum',
                                'TBT_integral','TBT','TBT_multiple_file','halt']]
+
 
 def addHardEdgeQuad(lattice):
     quadIndex = []

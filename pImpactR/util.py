@@ -256,7 +256,7 @@ def pyNaff(nmode,signal,window_id=1):
 #==============================================================================
 
 
-def get_tune(beamIn,latticeIn,pData6D_init,direction='x',nturn=1024, order=3):
+def get_tune_via_tracking(beamIn,latticeIn,pData6D_init,direction='x',nturn=1024, order=3):
     from impactIO import clearLattice
     from impactIO import writeInputFile
     from impactIO import writeParticleData
@@ -310,9 +310,8 @@ def get_tune(beamIn,latticeIn,pData6D_init,direction='x',nturn=1024, order=3):
     return tune[0], amp[0]
     
     
-    
-    
-def get_closed_orbit(beamIn,latticeIn,pData4D_init,delta,delta0=0):
+        
+def get_closed_orbit4D(beamIn,latticeIn,pData4D_init,delta):
     from impactIO import clearLattice
     from impactIO import writeInputFile
     from impactIO import getElem
@@ -352,7 +351,7 @@ def get_closed_orbit(beamIn,latticeIn,pData4D_init,delta,delta0=0):
        
         fID = args[0]
         beam = args[1]
-        delta=args[2]
+        delta= args[2]
             
         if len(args)>3:
             order=args[3]
@@ -373,24 +372,151 @@ def get_closed_orbit(beamIn,latticeIn,pData4D_init,delta,delta0=0):
         diff = pData4D_init - dataOut[0,:4]
         return np.sum(diff*diff)
     
-    result = opt.minimize(_cost_closed_orbit,pData4D_init,args=([fID,beam,delta]),method='Nelder-Mead',tol=1.0e-5)
+    result = opt.minimize(_cost_closed_orbit,pData4D_init,args=([fID,beam,delta]),method='Nelder-Mead',tol=1.0e-7)
     if result.message=='Optimization terminated successfully.':
-        return result.x, result.fun
+        print('closed orbit optimization terminated successfully.')
+        print('Closed orbit solution:',result.x)
+        print('Least squre error sum:', result.fun)
+        
+        return result.x
+
+    
+    
+import pandas as __pd
+    
+    
+    
+def getTransferMap4D(beamIn,lattice,delta=0,epsilon=[1e-8,1e-6,1e-8,1e-6],order=3):
+    """
+    M = getTransferMap(lattice,q,mass,ke,freq,
+                       epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
+                       fname='test.in' )
+    get linear transfer map (without space-charge)  by tracking 6 particles
+    whose initial phase-space perturbation given by epsilon
+    input
+        beamIn  = impact beam class
+        lattice = (dict) lattice dictionary whose transvermap to be determined
+        epsilon = 6 dimension array of perturbation for 
+                  x,px,y,py, z*360/v/freq, E  in unit of 
+                  [m],[rad],[m],[rad],[deg],[MeV]
+                  default : epsilon = [1e-e-8,1e-6,1e-8,1e-6,1e-7,1.0]
+    """
+    from impactIO import writeInputFile
+    from impactIO import writeParticleData
+    from impactIO import readParticleData
+    from impactIO import run
+    from impactIO import getElem
+    from copy import deepcopy as copy
+    
+    
+    
+    if delta!=0:
+        closed_orbit = get_closed_orbit4D(beamIn,lattice,np.zeros(4),delta)
     else:
-        diff = delta-delta0
-        result.x = pData4D_init
-        print('pData4D_init failed to get closed orbit. Trying from other initial conditions...')
-        for i in range(1,6):
-            tmp = delta0 + diff*0.2*i
-            pData4D_init = result.x
-            result = opt.minimize(_cost_closed_orbit,result.x,args=([fID,beam,tmp]),method='Nelder-Mead')
-            if result.message != 'Optimization terminated successfully.':
-                result.x = pData4D_init
-                print('pData4D_init failed to get closed orbit again. Trying from other initial conditions...')
-                for j in range(1,6):
-                    tmp = pData4D_init0 + diff *(0.2*(i-1) + 0.02*j)
-                    result = opt.minimize(_cost_closed_orbit,result.x,args=([fID,beam,tmp]),method='Nelder-Mead')
-                    if result.message != 'Optimization terminated successfully.':
-                        print('get closed orbit failed!!!')
-                        return 1
-        return result
+        closed_orbit = np.zeros(4)
+    
+    beam = copy(beamIn)
+    beam.nCore_y=1
+    beam.nCore_z=1
+    beam.n_particles=6
+    beam.distribution.distribution_type = 'ReadFile'
+    gam0 = beam.kinetic_energy/beam.mass+1.0
+    
+    line = lattice.copy()
+    line = [item for item in line if not item.type == 'write_raw_ptcl']    
+    line = [item for item in line if not item.type == 'loop']   
+    loop = getElem('loop')
+    loop.turns = 1
+    line.insert(0,loop)
+    elemWrite = getElem('write_raw_ptcl')
+    elemWrite.file_id = 5926
+    elemWrite.format_id = 2
+    line.append(elemWrite)
+    writeInputFile(beam,line)
+    
+    data = np.zeros([4,9])
+    for i in range(4):
+        data[i,:4] = closed_orbit[:]
+    for i in range(4):
+        data[i,i] = data[i,i] + epsilon[i]
+        data[i,8] = i+1
+    data[:,5] = delta*(gam0+1)/gam0*beam.kinetic_energy
+    data[:,6] = beam.multi_charge.q_m[0]
+    writeParticleData(data,beam.kinetic_energy, beam.mass, beam.frequency)
+    run(order=order)
+    
+    dataOut = readParticleData(5926, beam.kinetic_energy, beam.mass, beam.frequency, format_id=2)[:,:4]
+    #os.system('rm fort.'+str(fileID))
+    m,n = dataOut.shape
+    M = np.zeros([4,4])
+    if m<4:
+        print('particle lost observed. too large inital perturbation')
+    else:
+        for i in range(4):
+            M[:,i] = (dataOut[i,:]-closed_orbit)/epsilon[i]
+    return __pd.DataFrame(M)
+
+
+    
+def getTransferMap6D(beamIn,lattice,epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],order=3):
+    """
+    M = getTransferMap(lattice,q,mass,ke,freq,
+                       epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
+                       fname='test.in' )
+    get linear transfer map (without space-charge)  by tracking 6 particles
+    whose initial phase-space perturbation given by epsilon
+    input
+        beamIn  = impact beam class
+        lattice = (dict) lattice dictionary whose transvermap to be determined
+        epsilon = 6 dimension array of perturbation for 
+                  x,px,y,py, z*360/v/freq, E  in unit of 
+                  [m],[rad],[m],[rad],[deg],[MeV]
+                  default : epsilon = [1e-e-8,1e-6,1e-8,1e-6,1e-7,1.0]
+    """
+    from impactIO import writeInputFile
+    from impactIO import writeParticleData
+    from impactIO import readParticleData
+    from impactIO import run
+    from impactIO import getElem
+    from copy import deepcopy as copy
+    
+    
+    beam = copy(beamIn)
+    beam.nCore_y=1
+    beam.nCore_z=1
+    beam.n_particles=6
+    beam.distribution.distribution_type = 'ReadFile'
+    gam0 = beam.kinetic_energy/beam.mass+1.0
+    bet0 = np.sqrt((gam0+1.0)*(gam0-1.0))/gam0
+    bg0  = gam0*bet0
+    
+    line = lattice.copy()
+    line = [item for item in line if not item.type == 'write_raw_ptcl']    
+    line = [item for item in line if not item.type == 'loop']   
+    loop = getElem('loop')
+    loop.turns = 1
+    line.insert(0,loop)
+    elemWrite = getElem('write_raw_ptcl')
+    elemWrite.file_id = 5926
+    elemWrite.format_id = 2
+    line.append(elemWrite)
+    writeInputFile(beam,line)
+    
+    data = np.zeros([6,9])
+    for i in range(6):
+        data[i,i] = epsilon[i]
+        data[i,8] = i+1
+    data[:,6] = beam.multi_charge.q_m[0]
+    writeParticleData(data,beam.kinetic_energy, beam.mass, beam.frequency)
+    run(order=order)
+    
+    dataOut = readParticleData(5926, beam.kinetic_energy, beam.mass, beam.frequency, format_id=2)[:,:6]
+    #os.system('rm fort.'+str(fileID))
+    m,n = dataOut.shape
+    M = np.zeros([6,6])
+    if m<6:
+        print('particle lost observed. too large inital perturbation')
+    else:
+        for i in range(6):
+            M[:,i] = dataOut[i,:]/epsilon[i]
+    return __pd.DataFrame(M)

@@ -75,8 +75,12 @@ def lattice(elemList=[],MLIline=[],impactBeam=None):
           f.file_id = 350
           f.length = item.l
           f.pipe_radius = 2.0*item.hgap
+          if f.pipe_radius == 0:
+            f.pipe_radius = 1.0
           f.fringe_field_integration = item.fint
           f.bending_angle = item.angle
+          f.entrance_angle = item.e1
+          f.exit_angle = item.e2
           f=[f]
         elif elem == 'nlinsert':
           f = getElem('nonlinear_insert')
