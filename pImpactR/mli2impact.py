@@ -119,7 +119,7 @@ def lattice(elemList=[],MLIline=[],impactBeam=None):
           f=[f]
         elif elem == 'sextupole':
           L = item.l
-          N = int(np.ceil(L/0.01))
+          N = int(np.ceil(L/0.02))
           print('MLI sextupole of length '+str(L)+' found. Converting to '+str(N)+' drift-kick-drift thin element')
           kick = getElem('multipole_thin')
           drif = getElem('drift')
@@ -152,7 +152,7 @@ def lattice(elemList=[],MLIline=[],impactBeam=None):
       fList=fList+f
     for elem in fList:
       if 'length' in elem:
-        elem.n_sckick = int(np.ceil(elem.length*20))
+        elem.n_sckick = int(np.ceil(elem.length*25))
   return fList
 
   

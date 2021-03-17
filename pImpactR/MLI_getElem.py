@@ -349,10 +349,15 @@ class line(elemClass):
 #         except TypeError:
 #           print('following is not MLI element')
 #           print(item)
+      flag_n = False
       if k>=5:
         k=0
         f = f+ '& \n'
-    f = f+')'
+        flag_n = True
+    if flag_n:
+        f = f[:-3] + ')'
+    else:
+        f = f+')'
     return f
   
   
