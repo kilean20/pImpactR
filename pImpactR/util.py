@@ -386,7 +386,7 @@ import pandas as __pd
     
     
     
-def getTransferMap4D(beamIn,lattice,delta=0,epsilon=[1e-8,1e-6,1e-8,1e-6],order=3):
+def getTransferMap4D(beamIn,lattice,delta=0,epsilon=[1e-8,1e-6,1e-8,1e-6],order=3,flagSearchClosedOrbit=True):
     """
     M = getTransferMap(lattice,q,mass,ke,freq,
                        epsilon=[1e-8,1e-6,1e-8,1e-6,1e-7,1.0],
@@ -410,7 +410,7 @@ def getTransferMap4D(beamIn,lattice,delta=0,epsilon=[1e-8,1e-6,1e-8,1e-6],order=
     
     
     
-    if delta!=0:
+    if delta!=0 and flagSearchClosedOrbit:
         closed_orbit = get_closed_orbit4D(beamIn,lattice,np.zeros(4),delta)
     else:
         closed_orbit = np.zeros(4)
