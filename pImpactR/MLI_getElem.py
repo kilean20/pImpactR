@@ -398,7 +398,9 @@ class tmi(elemClass):
             f.write(str(i+1)+','+str(j+1)+', '+str(M.values[i,j])+'\n')
       if isinstance(G,pd.DataFrame):
         for i in range(len(G)):
-          f.write(str(G.iloc[i].name)+', '+str(G.iloc[i].GP)+'\n')
+          f.write(str(G.index[i])+', '+str(G.GP[i])+'\n')
+        if G.index[i]!='923':
+          f.write('923, 0.0\n')
       else:
         f.write('923, 0.0\n')
   

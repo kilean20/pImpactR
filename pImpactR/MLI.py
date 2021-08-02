@@ -61,12 +61,14 @@ class buildLabor(dictClass):
 #                                   read outputs                               
 #==============================================================================
 def readTransferMap(fname='mli.out'):
-  M = np.zeros([6,6])
   Ind1 = []
   Ind2 = []
-  Val  = []
+  Val  = []  
+  M = np.zeros([6,6])
   iM = -1
   iG = -1
+  iT = -1
+  iU = -1
   with open(fname) as f:
     lines = f.readlines()
   if fname[:4]=='fort':
@@ -94,12 +96,19 @@ def readTransferMap(fname='mli.out'):
         Ind1.append(int(line[0]))
         Val.append(float(line[1]))
     G = pd.DataFrame({'GP':Val},index=Ind1)
+    Ind1 = []
+    Ind2 = []
+    Val  = []  
   elif fname=='mli.out':
     for i,line in enumerate(lines):
       if 'nonzero matrix elements in full precision:' in line:
         iM = i
       if 'nonzero elements in generating polynomial are :' in line:
         iG = i
+      if 'nonzero elements in second order matrix are :' in line:
+        iT = i
+      if 'nonzero elements in third order matrix are :' in line:
+        iU = i
     # --- get Matrix --- 
     if iM != -1:
       for line in lines[iM+1:]:
@@ -119,9 +128,39 @@ def readTransferMap(fname='mli.out'):
           Ind2.append(line[9:22])
           Val.append(float(line[23:-1]))
     G = pd.DataFrame({'exponents':Ind2,'GP':Val},index=Ind1)
+    Ind1 = []
+    Ind2 = []
+    Val  = []  
+    if iT != -1:
+      with open(fname) as f:
+        for line in lines[iT+2:]:
+          if line=='\n':
+            break
+          #Ind1.append(line[2:22])
+          Ind1.append(line[10:12])
+          Ind2.append(line[12:24])
+          Val.append(float(line[25:-1]))
+    T = pd.DataFrame({'target':Ind1,'poly':Ind2,'val':Val})
+    Ind1 = []
+    Ind2 = []
+    Val  = []  
+    if iU != -1:
+      with open(fname) as f:
+        for line in lines[iU+2:]:
+          if line=='\n':
+            break
+          #Ind1.append(line[2:22])
+          Ind1.append(line[10:12])
+          Ind2.append(line[12:24])
+          Val.append(float(line[25:-1])) 
+    U = pd.DataFrame({'target':Ind1,'poly':Ind2,'val':Val})
+    Ind1 = []
+    Ind2 = []
+    Val  = []  
   else:
     raise ValueError('fname')
-  return M,G  
+  return M,G,T,U
+
 
 def getTBT(npt,nturn,fname='rays.out'):
     TBT = np.loadtxt(fname)
