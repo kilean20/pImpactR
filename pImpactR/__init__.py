@@ -10,7 +10,10 @@ from impact2mli import *
 from elegant2impact import *
 import mli2impact
 import data
-import opt
+try:
+  import opt
+except:
+  print('scipy not installed or version not met. turning off optimization sub-module..')
 import util
 import plot
 import MLI
